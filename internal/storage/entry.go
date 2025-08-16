@@ -77,9 +77,10 @@ func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
 			title=$1,
 			content=$2,
 			reading_time=$3,
-			document_vectors = setweight(to_tsvector($4), 'A') || setweight(to_tsvector($5), 'B')
+			document_vectors = setweight(to_tsvector($4), 'A') || setweight(to_tsvector($5), 'B'),
+			content_html=$6
 		WHERE
-			id=$6 AND user_id=$7
+			id=$7 AND user_id=$8
 	`
 
 	if _, err := s.db.Exec(
@@ -89,6 +90,7 @@ func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
 		entry.ReadingTime,
 		truncatedTitle,
 		truncatedContent,
+		entry.ContentHTML,
 		entry.ID,
 		entry.UserID); err != nil {
 		return fmt.Errorf(`store: unable to update entry #%d: %v`, entry.ID, err)
@@ -115,7 +117,8 @@ func (s *Storage) createEntry(tx *sql.Tx, entry *model.Entry) error {
 				reading_time,
 				changed_at,
 				document_vectors,
-				tags
+				tags,
+				content_html
 			)
 		VALUES
 			(
@@ -131,7 +134,8 @@ func (s *Storage) createEntry(tx *sql.Tx, entry *model.Entry) error {
 				$10,
 				now(),
 				setweight(to_tsvector($11), 'A') || setweight(to_tsvector($12), 'B'),
-				$13
+				$13,
+				$14
 			)
 		RETURNING
 			id, status, created_at, changed_at
@@ -151,6 +155,7 @@ func (s *Storage) createEntry(tx *sql.Tx, entry *model.Entry) error {
 		truncatedTitle,
 		truncatedContent,
 		pq.Array(entry.Tags),
+		entry.ContentHTML,
 	).Scan(
 		&entry.ID,
 		&entry.Status,
@@ -189,7 +194,8 @@ func (s *Storage) updateEntry(tx *sql.Tx, entry *model.Entry) error {
 			author=$5,
 			reading_time=$6,
 			document_vectors = setweight(to_tsvector($7), 'A') || setweight(to_tsvector($8), 'B'),
-			tags=$12
+			tags=$12,
+			content_html=$13
 		WHERE
 			user_id=$9 AND feed_id=$10 AND hash=$11
 		RETURNING
@@ -209,6 +215,7 @@ func (s *Storage) updateEntry(tx *sql.Tx, entry *model.Entry) error {
 		entry.FeedID,
 		entry.Hash,
 		pq.Array(entry.Tags),
+		entry.ContentHTML,
 	).Scan(&entry.ID)
 	if err != nil {
 		return fmt.Errorf(`store: unable to update entry %q: %v`, entry.URL, err)

@@ -113,6 +113,10 @@ func (e *EntryUpdateRequest) Patch(entry *Entry) {
 		entry.Content = *e.Content
 	}
 
+	if e.ContentHTML != nil && *e.ContentHTML != "" {
+		entry.ContentHTML = *e.ContentHTML
+	}
+
 	if e.ReadingTime != nil && *e.ReadingTime != 0 {
 		entry.ReadingTime = *e.ReadingTime
 	}

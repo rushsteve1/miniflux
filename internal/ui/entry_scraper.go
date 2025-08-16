@@ -58,7 +58,7 @@ func (h *handler) fetchContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.store.UpdateEntryTitleAndContent(entry); err != nil {
+	if err := h.store.UpdateEntry(entry); err != nil {
 		json.ServerError(w, r, err)
 		return
 	}

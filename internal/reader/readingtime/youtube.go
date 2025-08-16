@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright The Miniflux Authors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-package processor // import "miniflux.app/v2/internal/reader/processor"
+package readingtime // import "miniflux.app/v2/internal/reader/readingtime"
 
 import (
 	"encoding/json"
@@ -34,15 +34,15 @@ func shouldFetchYouTubeWatchTimeForSingleEntry(entry *model.Entry) bool {
 	return config.Opts.FetchYouTubeWatchTime() && config.Opts.YouTubeApiKey() == "" && isYouTubeVideoURL(entry.URL)
 }
 
-func shouldFetchYouTubeWatchTimeInBulk() bool {
-	return config.Opts.FetchYouTubeWatchTime() && config.Opts.YouTubeApiKey() != ""
-}
-
 func fetchYouTubeWatchTimeForSingleEntry(websiteURL string) (int, error) {
 	return fetchWatchTime(websiteURL, `meta[itemprop="duration"]`, true)
 }
 
-func fetchYouTubeWatchTimeInBulk(entries []*model.Entry) {
+func FetchYouTubeWatchTimeInBulk(entries []*model.Entry) {
+	if !config.Opts.FetchYouTubeWatchTime() || config.Opts.YouTubeApiKey() == "" {
+		return
+	}
+
 	var videosEntriesMapping = make(map[string]*model.Entry, len(entries))
 	var videoIDs []string
 

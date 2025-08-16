@@ -65,41 +65,7 @@ func (s *Storage) CountUnreadEntries(userID int64) int {
 // NewEntryQueryBuilder returns a new EntryQueryBuilder
 func (s *Storage) NewEntryQueryBuilder(userID int64) *EntryQueryBuilder {
 	return NewEntryQueryBuilder(s, userID)
-}
-
-// UpdateEntryTitleAndContent updates entry title and content.
-func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
-	truncatedTitle, truncatedContent := truncateTitleAndContentForTSVectorField(entry.Title, entry.Content)
-	query := `
-		UPDATE
-			entries
-		SET
-			title=$1,
-			content=$2,
-			reading_time=$3,
-			document_vectors = setweight(to_tsvector($4), 'A') || setweight(to_tsvector($5), 'B'),
-			scroll_percent = 0
-+			content_html=$6
-		WHERE
-			id=$6 AND user_id=$7
-	`
-
-	_, err := s.db.Exec(
-		query,
-		entry.Title,
-		entry.Content,
-		entry.ReadingTime,
-		truncatedTitle,
-		truncatedContent,
-		entry.ID,
-		entry.UserID,
-	)
-	if err != nil {
-		return fmt.Errorf(`store: unable to update entry #%d: %v`, entry.ID, err)
-	}
-
-	return nil
-}
+} 
 
 func (s *Storage) CreateEntry(entry *model.Entry) error {
 	tx, err := s.db.Begin()

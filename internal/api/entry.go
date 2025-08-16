@@ -274,11 +274,12 @@ func (h *handler) updateEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entryUpdateRequest.Patch(entry)
 	if user.ShowReadingTime {
-		entry.ReadingTime = readingtime.EstimateReadingTime(entry.Content, user.DefaultReadingSpeed, user.CJKReadingSpeed)
+		rt := readingtime.EstimateReadingTime(entry, user)
+		entryUpdateRequest.ReadingTime = &rt
 	}
 
+	entryUpdateRequest.Patch(entry)
 	if err := h.store.UpdateEntry(entry); err != nil {
 		json.ServerError(w, r, err)
 		return
@@ -355,14 +356,14 @@ func (h *handler) fetchContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := processor.ProcessEntryWebPage(feed, entry, user); err != nil {
+	if err := processor.ProcessEntryWebPage( feed, entry, user); err != nil {
 		json.ServerError(w, r, err)
 		return
 	}
 
 	shouldUpdateContent := request.QueryBoolParam(r, "update_content", false)
 	if shouldUpdateContent {
-		if err := h.store.UpdateEntryTitleAndContent(entry); err != nil {
+		if err := h.store.UpdateEntry(entry); err != nil {
 			json.ServerError(w, r, err)
 			return
 		}

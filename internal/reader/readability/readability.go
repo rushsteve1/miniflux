@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"miniflux.app/v2/internal/urllib"
+	"miniflux.app/v2/internal/model"
 
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
@@ -71,19 +71,17 @@ func (c candidateList) String() string {
 }
 
 // ExtractContent returns relevant content.
-func ExtractContent(page io.Reader) (baseURL string, extractedContent string, err error) {
+func ExtractContent(page io.Reader) (model.EntryUpdateRequest, error) {
 	document, err := goquery.NewDocumentFromReader(page)
 	if err != nil {
-		return "", "", err
+		return model.EntryUpdateRequest{}, err
 	}
 
-	if hrefValue, exists := document.FindMatcher(goquery.Single("head base")).Attr("href"); exists {
-		hrefValue = strings.TrimSpace(hrefValue)
-		if urllib.IsAbsoluteURL(hrefValue) {
-			baseURL = hrefValue
-		}
-	}
+	return ExtractContentFromDocument(document)
+}
 
+// ExtractContentFromDocument returns relevant content from the document.
+func ExtractContentFromDocument(document *goquery.Document) (request model.EntryUpdateRequest, err error) {
 	document.Find("script,style").Remove()
 
 	removeUnlikelyCandidates(document)
@@ -93,13 +91,13 @@ func ExtractContent(page io.Reader) (baseURL string, extractedContent string, er
 	topCandidate := getTopCandidate(document, candidates)
 
 	slog.Debug("Readability parsing",
-		slog.String("base_url", baseURL),
 		slog.String("candidates", candidates.String()),
 		slog.String("topCandidate", topCandidate.String()),
 	)
 
-	extractedContent = getArticle(topCandidate, candidates)
-	return baseURL, extractedContent, nil
+	extractedContent := getArticle(topCandidate, candidates)
+	request.Content = &extractedContent
+	return request, nil
 }
 
 func getSelectionLength(s *goquery.Selection) int {

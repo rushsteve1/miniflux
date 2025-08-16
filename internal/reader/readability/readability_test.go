@@ -78,13 +78,13 @@ func TestBaseURL(t *testing.T) {
 			</body>
 		</html>`
 
-	baseURL, _, err := ExtractContent(strings.NewReader(html))
+	request, err := ExtractContent(strings.NewReader(html))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if baseURL != "https://example.org/" {
-		t.Errorf(`Unexpected base URL, got %q instead of "https://example.org/"`, baseURL)
+	if *request.URL != "https://example.org/" {
+		t.Errorf(`Unexpected base URL, got %q instead of "https://example.org/"`, *request.URL)
 	}
 }
 
@@ -102,13 +102,13 @@ func TestMultipleBaseURL(t *testing.T) {
 			</body>
 		</html>`
 
-	baseURL, _, err := ExtractContent(strings.NewReader(html))
+	request, err := ExtractContent(strings.NewReader(html))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if baseURL != "https://example.org/" {
-		t.Errorf(`Unexpected base URL, got %q instead of "https://example.org/"`, baseURL)
+	if *request.URL != "https://example.org/" {
+		t.Errorf(`Unexpected base URL, got %q instead of "https://example.org/"`, *request.URL)
 	}
 }
 
@@ -125,13 +125,13 @@ func TestRelativeBaseURL(t *testing.T) {
 			</body>
 		</html>`
 
-	baseURL, _, err := ExtractContent(strings.NewReader(html))
+	request, err := ExtractContent(strings.NewReader(html))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if baseURL != "" {
-		t.Errorf(`Unexpected base URL, got %q`, baseURL)
+	if *request.URL != "https://example.org/test/" {
+		t.Errorf(`Unexpected base URL, got %q instead of "https://example.org/test/"`, *request.URL)
 	}
 }
 
@@ -148,13 +148,13 @@ func TestWithoutBaseURL(t *testing.T) {
 			</body>
 		</html>`
 
-	baseURL, _, err := ExtractContent(strings.NewReader(html))
+	request, err := ExtractContent(strings.NewReader(html))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if baseURL != "" {
-		t.Errorf(`Unexpected base URL, got %q instead of ""`, baseURL)
+	if *request.URL != "https://example.org/" {
+		t.Errorf(`Unexpected base URL, got %q instead of "https://example.org/"`, *request.URL)
 	}
 }
 
@@ -176,17 +176,21 @@ func TestRemoveStyleScript(t *testing.T) {
 		</html>`
 	want := `<div><div><article>Somecontent</article></div></div>`
 
-	_, content, err := ExtractContent(strings.NewReader(html))
+	request, err := ExtractContent(strings.NewReader(html))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	content = strings.ReplaceAll(content, "\n", "")
-	content = strings.ReplaceAll(content, " ", "")
-	content = strings.ReplaceAll(content, "\t", "")
+	if request.Content == nil {
+		t.Fatalf("Content is nil")
+	}
 
-	if content != want {
-		t.Errorf(`Invalid content, got %s instead of %s`, content, want)
+	*request.Content = strings.ReplaceAll(*request.Content, "\n", "")
+	*request.Content = strings.ReplaceAll(*request.Content, " ", "")
+	*request.Content = strings.ReplaceAll(*request.Content, "\t", "")
+
+	if *request.Content != want {
+		t.Errorf(`Invalid content, got %s instead of %s`, *request.Content, want)
 	}
 }
 
@@ -205,17 +209,21 @@ func TestRemoveBlacklist(t *testing.T) {
 		</html>`
 	want := `<div><div><articleclass="legit">Valid!</article></div></div>`
 
-	_, content, err := ExtractContent(strings.NewReader(html))
+	request, err := ExtractContent(strings.NewReader(html))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	content = strings.ReplaceAll(content, "\n", "")
-	content = strings.ReplaceAll(content, " ", "")
-	content = strings.ReplaceAll(content, "\t", "")
+	if request.Content == nil {
+		t.Fatal("Content is nil")
+	}
 
-	if content != want {
-		t.Errorf(`Invalid content, got %s instead of %s`, content, want)
+	*request.Content = strings.ReplaceAll(*request.Content, "\n", "")
+	*request.Content = strings.ReplaceAll(*request.Content, " ", "")
+	*request.Content = strings.ReplaceAll(*request.Content, "\t", "")
+
+	if *request.Content != want {
+		t.Errorf(`Invalid content, got %s instead of %s`, *request.Content, want)
 	}
 }
 
@@ -231,13 +239,13 @@ func TestNestedSpanInCodeBlock(t *testing.T) {
 		</html>`
 	want := `<div><div><p>Some content</p><pre><code class="hljs-built_in">Code block with <span class="hljs-built_in">nested span</span> <span class="hljs-comment"># exit 1</span></code></pre></div></div>`
 
-	_, result, err := ExtractContent(strings.NewReader(html))
+	request, err := ExtractContent(strings.NewReader(html))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if result != want {
-		t.Errorf(`Invalid content, got %s instead of %s`, result, want)
+	if *request.Content != want {
+		t.Errorf(`Invalid content, got %s instead of %s`, *request.Content, want)
 	}
 }
 
@@ -2292,7 +2300,7 @@ func TestCandidateStringEdgeCases(t *testing.T) {
 }
 
 func TestExtractContentWithBrokenReader(t *testing.T) {
-	if _, _, err := ExtractContent(&brokenReader{}); err == nil {
+	if _, err := ExtractContent(&brokenReader{}); err == nil {
 		t.Error("Expected ExtractContent to return an error with broken reader")
 	}
 }

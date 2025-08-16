@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 func TestGetPredefinedRules(t *testing.T) {
@@ -62,7 +64,12 @@ func TestSelectorRules(t *testing.T) {
 			t.Fatalf(`Unable to read file %q: %v`, filename, err)
 		}
 
-		_, actualResult, err := findContentUsingCustomRules(bytes.NewReader(html), rule)
+		doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
+		if err != nil {
+			t.Fatalf(`Unable to parse HTML document: %v`, err)
+		}
+
+		_, actualResult, err := findContentUsingCustomRules(doc, rule)
 		if err != nil {
 			t.Fatalf(`Scraping error for %q - %q: %v`, filename, rule, err)
 		}
@@ -80,7 +87,12 @@ func TestSelectorRules(t *testing.T) {
 
 func TestParseBaseURLWithCustomRules(t *testing.T) {
 	html := `<html><head><base href="https://example.com/"></head><body><img src="image.jpg"></body></html>`
-	baseURL, _, err := findContentUsingCustomRules(strings.NewReader(html), "img")
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if err != nil {
+		t.Fatalf(`Unable to parse HTML document: %v`, err)
+	}
+
+	baseURL, _, err := findContentUsingCustomRules(doc, "img")
 	if err != nil {
 		t.Fatalf(`Scraping error: %v`, err)
 	}
@@ -92,7 +104,12 @@ func TestParseBaseURLWithCustomRules(t *testing.T) {
 
 func TestParseMultipleBaseURLWithCustomRules(t *testing.T) {
 	html := `<html><head><base href="https://example.com/"><base href="https://example.org/"/></head><body><img src="image.jpg"></body></html>`
-	baseURL, _, err := findContentUsingCustomRules(strings.NewReader(html), "img")
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if err != nil {
+		t.Fatalf(`Unable to parse HTML document: %v`, err)
+	}
+
+	baseURL, _, err := findContentUsingCustomRules(doc, "img")
 	if err != nil {
 		t.Fatalf(`Scraping error: %v`, err)
 	}
@@ -104,7 +121,12 @@ func TestParseMultipleBaseURLWithCustomRules(t *testing.T) {
 
 func TestParseRelativeBaseURLWithCustomRules(t *testing.T) {
 	html := `<html><head><base href="/test"></head><body><img src="image.jpg"></body></html>`
-	baseURL, _, err := findContentUsingCustomRules(strings.NewReader(html), "img")
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if err != nil {
+		t.Fatalf(`Unable to parse HTML document: %v`, err)
+	}
+
+	baseURL, _, err := findContentUsingCustomRules(doc, "img")
 	if err != nil {
 		t.Fatalf(`Scraping error: %v`, err)
 	}
@@ -116,7 +138,12 @@ func TestParseRelativeBaseURLWithCustomRules(t *testing.T) {
 
 func TestParseEmptyBaseURLWithCustomRules(t *testing.T) {
 	html := `<html><head><base href=" "></head><body><img src="image.jpg"></body></html>`
-	baseURL, _, err := findContentUsingCustomRules(strings.NewReader(html), "img")
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if err != nil {
+		t.Fatalf(`Unable to parse HTML document: %v`, err)
+	}
+
+	baseURL, _, err := findContentUsingCustomRules(doc, "img")
 	if err != nil {
 		t.Fatalf(`Scraping error: %v`, err)
 	}
@@ -128,7 +155,12 @@ func TestParseEmptyBaseURLWithCustomRules(t *testing.T) {
 
 func TestParseMissingBaseURLWithCustomRules(t *testing.T) {
 	html := `<html><head></head><body><img src="image.jpg"></body></html>`
-	baseURL, _, err := findContentUsingCustomRules(strings.NewReader(html), "img")
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if err != nil {
+		t.Fatalf(`Unable to parse HTML document: %v`, err)
+	}
+
+	baseURL, _, err := findContentUsingCustomRules(doc, "img")
 	if err != nil {
 		t.Fatalf(`Scraping error: %v`, err)
 	}

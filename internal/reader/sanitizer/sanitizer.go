@@ -15,6 +15,9 @@ import (
 	"miniflux.app/v2/internal/urllib"
 
 	"golang.org/x/net/html"
+
+	"github.com/tdewolff/minify/v2"
+	htmlminify "github.com/tdewolff/minify/v2/html"
 )
 
 var (
@@ -197,6 +200,7 @@ type SanitizerOptions struct {
 	OpenLinksInNewTab bool
 }
 
+// SanitizeHTML sanitizes and minifies the HTML content.
 func SanitizeHTML(baseURL, rawHTML string, sanitizerOptions *SanitizerOptions) string {
 	var tagStack []string
 	var parentTag string
@@ -211,7 +215,18 @@ func SanitizeHTML(baseURL, rawHTML string, sanitizerOptions *SanitizerOptions) s
 	// Errors are a non-issue, so they're handled later in the function.
 	parsedBaseUrl, _ := url.Parse(baseURL)
 
-	tokenizer := html.NewTokenizer(strings.NewReader(rawHTML))
+	// Minify HTML content while reading
+	m := minify.New()
+	// Options required to avoid breaking the HTML content.
+	m.Add("text/html", &htmlminify.Minifier{
+		KeepEndTags:         true,
+		KeepQuotes:          true,
+		KeepComments:        false,
+		KeepSpecialComments: false,
+		KeepDefaultAttrVals: false,
+	})
+
+	tokenizer := html.NewTokenizer(m.Reader("text/html", strings.NewReader(rawHTML)))
 	for {
 		if tokenizer.Next() == html.ErrorToken {
 			err := tokenizer.Err()

@@ -104,56 +104,27 @@ func ProcessFeedEntries(store *storage.Storage, feed *model.Feed, userID int64, 
 				slog.Bool("force_refresh", forceRefresh),
 			)
 
-			startTime := time.Now()
-
-			scrapedPageBaseURL, extractedContent, scraperErr := scraper.ScrapeWebsite(
+			scrapedPageBaseURL, _ := processEntryWithRequestBuilder(
+				feed,
+				entry,
+				user,
 				requestBuilder,
-				entry.URL,
-				feed.ScraperRules,
 			)
 
 			if scrapedPageBaseURL != "" {
 				webpageBaseURL = scrapedPageBaseURL
 			}
-
-			if config.Opts.HasMetricsCollector() {
-				status := "success"
-				if scraperErr != nil {
-					status = "error"
-				}
-				metric.ScraperRequestDuration.WithLabelValues(status).Observe(time.Since(startTime).Seconds())
-			}
-
-			if scraperErr != nil {
-				slog.Warn("Unable to scrape entry",
-					slog.Int64("user_id", user.ID),
-					slog.String("entry_url", entry.URL),
-					slog.Int64("feed_id", feed.ID),
-					slog.String("feed_url", feed.FeedURL),
-					slog.Any("error", scraperErr),
-				)
-			} else if extractedContent != "" {
-				// We replace the entry content only if the scraper doesn't return any error.
-				entry.Content = minifyContent(extractedContent)
-			}
 		}
-
-		rewrite.ApplyContentRewriteRules(entry, feed.RewriteRules)
 
 		if webpageBaseURL == "" {
 			webpageBaseURL = entry.URL
 		}
 
-		// The sanitizer should always run at the end of the process to make sure unsafe HTML is filtered out.
-		entry.Content = sanitizer.SanitizeHTML(webpageBaseURL, entry.Content, &sanitizer.SanitizerOptions{OpenLinksInNewTab: user.OpenExternalLinksInNewTab})
-
-		updateEntryReadingTime(store, feed, entry, entryIsNew, user)
-
 		filteredEntries = append(filteredEntries, entry)
 	}
 
-	if user.ShowReadingTime && shouldFetchYouTubeWatchTimeInBulk() {
-		fetchYouTubeWatchTimeInBulk(filteredEntries)
+	if user.ShowReadingTime {
+		readingtime.FetchYouTubeWatchTimeInBulk(filteredEntries)
 	}
 
 	feed.Entries = filteredEntries
@@ -161,7 +132,6 @@ func ProcessFeedEntries(store *storage.Storage, feed *model.Feed, userID int64, 
 
 // ProcessEntryWebPage downloads the entry web page and apply rewrite rules.
 func ProcessEntryWebPage(feed *model.Feed, entry *model.Entry, user *model.User) error {
-	startTime := time.Now()
 	entry.URL = rewrite.RewriteEntryURL(feed, entry)
 
 	requestBuilder := fetcher.NewRequestBuilder()
@@ -175,7 +145,13 @@ func ProcessEntryWebPage(feed *model.Feed, entry *model.Entry, user *model.User)
 	requestBuilder.IgnoreTLSErrors(feed.AllowSelfSignedCertificates)
 	requestBuilder.DisableHTTP2(feed.DisableHTTP2)
 
-	webpageBaseURL, extractedContent, scraperErr := scraper.ScrapeWebsite(
+	_, err := processEntryWithRequestBuilder(feed, entry, user, requestBuilder)
+	return err
+}
+
+func processEntryWithRequestBuilder(feed *model.Feed, entry *model.Entry, user *model.User, requestBuilder *fetcher.RequestBuilder) (scrapedPageBaseUrl string, err error) {
+	startTime := time.Now()
+	entryRequest, scraperErr := scraper.ScrapeWebsite(
 		requestBuilder,
 		entry.URL,
 		feed.ScraperRules,
@@ -190,18 +166,29 @@ func ProcessEntryWebPage(feed *model.Feed, entry *model.Entry, user *model.User)
 	}
 
 	if scraperErr != nil {
-		return scraperErr
+		slog.Warn("Unable to scrape entry",
+			slog.Int64("user_id", user.ID),
+			slog.String("entry_url", entry.URL),
+			slog.Int64("feed_id", feed.ID),
+			slog.String("feed_url", feed.FeedURL),
+			slog.Any("error", scraperErr),
+		)
+		return scrapedPageBaseUrl, scraperErr
 	}
 
-	if extractedContent != "" {
-		entry.Content = minifyContent(extractedContent)
+	if entryRequest.Content != nil && *entryRequest.Content != "" {
+		// Minify and sanitize the content
+		sanitized := sanitizer.SanitizeHTML(scrapedPageBaseUrl, *entryRequest.Content, &sanitizer.SanitizerOptions{OpenLinksInNewTab: user.OpenExternalLinksInNewTab})
+		entryRequest.Content = &sanitized
+
 		if user.ShowReadingTime {
-			entry.ReadingTime = readingtime.EstimateReadingTime(entry.Content, user.DefaultReadingSpeed, user.CJKReadingSpeed)
+			rt := readingtime.EstimateReadingTime(entry, user)
+			entryRequest.ReadingTime = &rt
 		}
 	}
 
+	entryRequest.Patch(entry)
 	rewrite.ApplyContentRewriteRules(entry, entry.Feed.RewriteRules)
-	entry.Content = sanitizer.SanitizeHTML(webpageBaseURL, entry.Content, &sanitizer.SanitizerOptions{OpenLinksInNewTab: user.OpenExternalLinksInNewTab})
 
-	return nil
+	return scrapedPageBaseUrl, nil
 }

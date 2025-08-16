@@ -5,7 +5,6 @@ package scraper // import "miniflux.app/v2/internal/reader/scraper"
 
 import (
 	"fmt"
-	"io"
 	"log/slog"
 	"strings"
 
@@ -18,17 +17,17 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func ScrapeWebsite(requestBuilder *fetcher.RequestBuilder, pageURL, rules string) (baseURL string, extractedContent string, err error) {
+func ScrapeWebsite(requestBuilder *fetcher.RequestBuilder, pageURL, rules string) (baseURL string, extractedContent string, archiveContent string, err error) {
 	responseHandler := fetcher.NewResponseHandler(requestBuilder.ExecuteRequest(pageURL))
 	defer responseHandler.Close()
 
 	if localizedError := responseHandler.LocalizedError(); localizedError != nil {
 		slog.Warn("Unable to scrape website", slog.String("website_url", pageURL), slog.Any("error", localizedError.Error()))
-		return "", "", localizedError.Error()
+		return "", "", "", localizedError.Error()
 	}
 
 	if !isAllowedContentType(responseHandler.ContentType()) {
-		return "", "", fmt.Errorf("scraper: this resource is not a HTML document (%s)", responseHandler.ContentType())
+		return "", "", "", fmt.Errorf("scraper: this resource is not a HTML document (%s)", responseHandler.ContentType())
 	}
 
 	// The entry URL could redirect somewhere else.
@@ -44,21 +43,35 @@ func ScrapeWebsite(requestBuilder *fetcher.RequestBuilder, pageURL, rules string
 		responseHandler.ContentType(),
 	)
 
+	// Parse the document once up front and use it multiple times
+	document, err := goquery.NewDocumentFromReader(htmlDocumentReader)
 	if err != nil {
-		return "", "", fmt.Errorf("scraper: unable to read HTML document with charset reader: %v", err)
+		return "", "", "", err
 	}
 
-	if sameSite && rules != "" {
-		slog.Debug("Extracting content with custom rules",
-			"url", pageURL,
-			"rules", rules,
-		)
-		baseURL, extractedContent, err = findContentUsingCustomRules(htmlDocumentReader, rules)
-	} else {
-		slog.Debug("Extracting content with readability",
-			"url", pageURL,
-		)
-		baseURL, extractedContent, err = readability.ExtractContent(htmlDocumentReader)
+	if err != nil {
+		return "", "", "", fmt.Errorf("scraper: unable to read HTML document with charset reader: %v", err)
+	}
+
+	if sameSite {
+		if rules != "" {
+			slog.Debug("Extracting content with custom rules",
+				"url", pageURL,
+				"rules", rules,
+			)
+			baseURL, extractedContent, err = findContentUsingCustomRules(document, rules)
+			if err != nil {
+				return "", "", "", err
+			}
+		} else {
+			slog.Debug("Extracting content with readability",
+				"url", pageURL,
+			)
+			baseURL, extractedContent, err = readability.ExtractContentFromDocument(document)
+			if err != nil {
+				return "", "", "", err
+			}
+		}
 	}
 
 	if baseURL == "" {
@@ -67,14 +80,10 @@ func ScrapeWebsite(requestBuilder *fetcher.RequestBuilder, pageURL, rules string
 		slog.Debug("Using base URL from HTML document", "base_url", baseURL)
 	}
 
-	return baseURL, extractedContent, nil
+	return baseURL, extractedContent, archiveContent, nil
 }
 
-func findContentUsingCustomRules(page io.Reader, rules string) (baseURL string, extractedContent string, err error) {
-	document, err := goquery.NewDocumentFromReader(page)
-	if err != nil {
-		return "", "", err
-	}
+func findContentUsingCustomRules(document *goquery.Document, rules string) (baseURL string, extractedContent string, err error) {
 
 	if hrefValue, exists := document.FindMatcher(goquery.Single("head base")).Attr("href"); exists {
 		hrefValue = strings.TrimSpace(hrefValue)

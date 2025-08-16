@@ -76,7 +76,12 @@ func ExtractContent(page io.Reader) (baseURL string, extractedContent string, er
 	if err != nil {
 		return "", "", err
 	}
+	
+	return ExtractContentFromDocument(document)
+}
 
+// ExtractContentFromDocument returns relevant content from the document.
+func ExtractContentFromDocument(document *goquery.Document) (baseURL string, extractedContent string, err error) {
 	if hrefValue, exists := document.FindMatcher(goquery.Single("head base")).Attr("href"); exists {
 		hrefValue = strings.TrimSpace(hrefValue)
 		if urllib.IsAbsoluteURL(hrefValue) {

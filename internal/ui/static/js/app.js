@@ -378,6 +378,15 @@ function goToAddSubscriptionPage() {
 }
 
 /**
+ * Navigate to the add entry page.
+ *
+ * @returns {void}
+ */
+function goToAddEntryPage() {
+    window.location.href = document.body.dataset.addEntryUrl;
+}
+
+/**
  * Navigate to the next or previous item in the list.
  *
  * If the offset is TOP, it will jump to the first item in the list.
@@ -1206,6 +1215,7 @@ function initializeKeyboardShortcuts() {
     keyboardHandler.on("s", () => handleSaveEntryAction());
     keyboardHandler.on("d", handleFetchOriginalContentAction);
     keyboardHandler.on("f", () => handleStarAction());
+    keyboardHandler.on("N", () => goToAddEntryPage());
 
     // Feed actions
     keyboardHandler.on("F", goToFeedPage);

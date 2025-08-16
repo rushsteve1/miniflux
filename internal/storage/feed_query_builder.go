@@ -87,6 +87,13 @@ func (f *FeedQueryBuilder) WithOffset(offset int) *FeedQueryBuilder {
 	return f
 }
 
+// WithManual filter by manual status.
+func (f *FeedQueryBuilder) WithManual(manual bool) *FeedQueryBuilder {
+	f.conditions = append(f.conditions, "f.manual = $"+strconv.Itoa(len(f.args)+1))
+	f.args = append(f.args, manual)
+	return f
+}
+
 func (f *FeedQueryBuilder) buildCondition() string {
 	return strings.Join(f.conditions, " AND ")
 }
@@ -180,7 +187,8 @@ func (f *FeedQueryBuilder) GetFeeds() (model.Feeds, error) {
 			f.ntfy_topic,
 			f.pushover_enabled,
 			f.pushover_priority,
-			f.proxy_url
+			f.proxy_url,
+			f.manual
 		FROM
 			feeds f
 		LEFT JOIN
@@ -264,6 +272,7 @@ func (f *FeedQueryBuilder) GetFeeds() (model.Feeds, error) {
 			&feed.PushoverEnabled,
 			&feed.PushoverPriority,
 			&feed.ProxyURL,
+			&feed.Manual,
 		)
 
 		if err != nil {

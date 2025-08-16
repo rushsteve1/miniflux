@@ -48,6 +48,7 @@
     data-service-worker-url="{{ route "javascript" "name" "service-worker" "checksum" .sw_js_checksum }}"
     {{ if .csrf }}data-csrf-token="{{ .csrf }}"{{ end }}
     data-add-subscription-url="{{ route "addSubscription" }}"
+    data-add-entry-url="{{ route "addEntry" }}"
     data-entries-status-url="{{ route "updateEntriesStatus" }}"
     data-refresh-all-feeds-url="{{ route "refreshAllFeeds" }}"
     {{ if .webAuthnEnabled }}
@@ -107,6 +108,9 @@
                 </li>
                 <li {{ if eq .menu "search" }}class="active"{{ end }} title="{{ t "tooltip.keyboard_shortcuts" "/" }}">
                     <a href="{{ route "search" }}" data-page="search">{{ icon "search" }}{{ t "menu.search" }}</a>
+                    <a href="{{ route "addEntry" }}" title="{{ t "tooltip.keyboard_shortcuts" "N" }}" aria-label="{{ t "menu.add_entry" }}">
+                        (+)
+                    </a>
                 </li>
                 <li {{ if eq .menu "settings" }}class="active"{{ end }} title="{{ t "tooltip.keyboard_shortcuts" "g s" }}">
                     <a href="{{ route "settings" }}" data-page="settings">{{ icon "settings" }}{{ t "menu.settings" }}</a>

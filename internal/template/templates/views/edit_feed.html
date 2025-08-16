@@ -11,6 +11,7 @@
             <li>
                 <a href="{{ route "feedEntries" "feedID" .feed.ID }}">{{ icon "entries" }}{{ t "menu.feed_entries" }}</a>
             </li>
+            {{ if not .feed.Manual }}
             <li>
                 <a href="#"
                     data-confirm="true"
@@ -21,12 +22,17 @@
                     data-url="{{ route "refreshFeed" "feedID" .feed.ID }}?forceRefresh=true"
                     data-no-action-url="{{ route "refreshFeed" "feedID" .feed.ID }}?forceRefresh=false">{{ icon "refresh" }}{{ t "menu.refresh_feed" }}</a>
             </li>
+            {{ end }}
         </ul>
     </nav>
 </section>
 {{ end }}
 
 {{ define "content"}}
+{{ if .feed.Manual }}
+<p role="alert" class="alert alert-info">{{ t "alert.manual_feed" }}</p>
+{{ end }}
+
 {{ if not .categories }}
     <p role="alert" class="alert alert-error">{{ t "page.add_feed.no_category" }}</p>
 {{ else }}
@@ -59,11 +65,13 @@
             <label for="form-title">{{ t "form.feed.label.title" }}</label>
             <input type="text" name="title" id="form-title" value="{{ .form.Title }}" spellcheck="false" required>
 
+            {{ if not .feed.Manual }}
             <label for="form-site-url">{{ t "form.feed.label.site_url" }}</label>
             <input type="url" name="site_url" id="form-site-url" placeholder="https://domain.tld/" value="{{ .form.SiteURL }}" spellcheck="false" required>
 
             <label for="form-feed-url">{{ t "form.feed.label.feed_url" }}</label>
             <input type="url" name="feed_url" id="form-feed-url" placeholder="https://domain.tld/" value="{{ .form.FeedURL }}" spellcheck="false" required>
+            {{ end }}
 
             <label for="form-description">{{ t "form.feed.label.description" }}</label>
             <textarea name="description" id="form-description" cols="40" rows="10" >{{ .form.Description }}</textarea>
@@ -73,13 +81,14 @@
             {{ end }}
 
             <label><input type="checkbox" name="no_media_player" {{ if .form.NoMediaPlayer }}checked{{ end }} value="1" >  {{ t "form.feed.label.no_media_player" }} </label>
-            <label><input type="checkbox" name="disabled" value="1" {{ if .form.Disabled }}checked{{ end }}> {{ t "form.feed.label.disabled" }}</label>
+            <label><input type="checkbox" name="disabled" value="1" {{ if or .form.Disabled .feed.Manual }}checked{{ end }} disabled="{{ .feed.Manual }}"> {{ t "form.feed.label.disabled" }}</label>
 
             <div class="buttons">
                 <button type="submit" class="button button-primary" data-label-loading="{{ t "form.submit.saving" }}">{{ t "action.update" }}</button>
             </div>
         </fieldset>
 
+        {{ if not .feed.Manual }}
         <fieldset>
             <legend>{{ t "form.feed.fieldset.network_settings" }}</legend>
 
@@ -117,6 +126,7 @@
                 <button type="submit" class="button button-primary" data-label-loading="{{ t "form.submit.saving" }}">{{ t "action.update" }}</button>
             </div>
         </fieldset>
+        {{ end }}
 
         <fieldset>
             <legend>{{ t "form.feed.fieldset.rules" }}</legend>

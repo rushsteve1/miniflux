@@ -1,0 +1,58 @@
+{{ define "title"}}{{ t "page.add_entry.title" }}{{ end }}
+
+{{ define "page_header"}}
+<section class="page-header" aria-labelledby="page-header-title">
+    <h1 id="page-header-title">{{ t "page.add_entry.title" }}</h1>
+</section>
+{{ end }}
+
+{{ define "content"}}
+<form action="{{ route "submitEntry" }}" method="POST" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{ .csrf }}">
+    {{ if .errorMessage }}
+        <div role="alert" class="alert alert-error">{{ .errorMessage }}</div>
+    {{ end }}
+
+    <label for="form-url">{{ t "form.entry.label.url" }}</label>
+    <input type="url" name="url" id="form-url" placeholder="https://domain.tld/" value="{{ .form.URL }}" spellcheck="false" required autofocus>
+    <div class="buttons">
+        <button type="submit" class="button button-primary" data-label-loading="{{ t "form.submit.loading" }}">{{ t "page.add_entry.submit" }}</button>
+    </div>
+
+    <label for="form-tags">{{ t "form.entry.label.tags" }}</label>
+    <input type="text" name="tags" id="form-tags" placeholder="{{ t "form.entry.placeholder.tags" }}" value="{{ .form.Tags | joinStrings }}">
+
+    <label for="form-feed">{{ t "form.entry.label.feed" }}</label>
+    <select name="feed_id" id="form-feed">
+        {{ range .feeds }}
+            <option value="{{ .ID }}" {{ if eq $.form.FeedID .ID }}selected{{ end }}>{{ .Title }}</option>
+        {{ end }}
+        <hr/>
+        <option value="0">{{ t "form.entry.option.new_feed" }}</option>
+    </select>
+
+    <label>
+        <input type="checkbox" name="download" value="1" checked>
+        {{ t "form.entry.label.download" }}
+    </label>
+
+    <details>
+        <summary>Optional fields</summary>
+        <div class="details-content">
+            <p role="alert" class="alert alert-info">{{ t "form.entry.optional_fields" }}</p>
+        </div>
+
+        <label for="form-title">{{ t "form.entry.label.title" }}</label>
+        <input type="text" name="title" id="form-title" placeholder="{{ t "form.entry.placeholder.title" }}" value="{{ .form.Title }}">
+
+        <label for="form-author">{{ t "form.entry.label.author" }}</label>
+        <input type="text" name="author" id="form-author" placeholder="{{ t "form.entry.placeholder.author" }}" value="{{ .form.Author }}">
+
+        <label for="form-date">{{ t "form.entry.label.date" }}</label>
+        <input type="date" name="date" id="form-date" placeholder="{{ t "form.entry.placeholder.date" }}" value="{{ .form.Date }}">
+
+        <label for="form-content">{{ t "form.entry.label.content" }}</label>
+        <textarea name="content" id="form-content" placeholder="{{ t "form.entry.placeholder.content" }}">{{ .form.Content }}</textarea>
+    </details>
+</form>
+{{ end }}

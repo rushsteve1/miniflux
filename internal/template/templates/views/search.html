@@ -3,6 +3,11 @@
 {{ define "page_header"}}
 <section class="page-header" aria-labelledby="page-header-title">
     <h1 id="page-header-title">{{ t "page.search.title" }} ({{ .total }})</h1>
+    <nav aria-label="{{ t "page.search.title" }} {{ t "menu.title" }}"><ul>
+        <li>
+            <a class="page-link" href="{{ route "addEntry" }}">{{ icon "save" }}{{ t "menu.add_entry" }}</a>
+        </li>
+    </ul></nav>
 </section>
 {{ end }}
 

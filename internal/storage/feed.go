@@ -24,12 +24,19 @@ func (l byStateAndName) Less(i, j int) bool {
 	if l.f[i].Disabled != l.f[j].Disabled {
 		return l.f[j].Disabled
 	}
+
+	// Then manual feeds
+	if l.f[i].Manual != l.f[j].Manual {
+		return l.f[i].Manual
+	}
+
 	if l.f[i].ParsingErrorCount != l.f[j].ParsingErrorCount {
 		return l.f[i].ParsingErrorCount > l.f[j].ParsingErrorCount
 	}
 	if l.f[i].UnreadCount != l.f[j].UnreadCount {
 		return l.f[i].UnreadCount > l.f[j].UnreadCount
 	}
+
 	return l.f[i].Title < l.f[j].Title
 }
 
@@ -268,10 +275,11 @@ func (s *Storage) CreateFeed(feed *model.Feed) error {
 			webhook_url,
 			disable_http2,
 			description,
-			proxy_url
+			proxy_url,
+			manual
 		)
 		VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31)
 		RETURNING
 			id
 	`
@@ -313,6 +321,7 @@ func (s *Storage) CreateFeed(feed *model.Feed) error {
 		feed.DisableHTTP2,
 		feed.Description,
 		feed.ProxyURL,
+		feed.Manual,
 	).Scan(&feed.ID)
 	if err != nil {
 		return fmt.Errorf(`store: unable to create feed %q: %v`, feed.FeedURL, err)
@@ -395,9 +404,10 @@ func (s *Storage) UpdateFeed(feed *model.Feed) (err error) {
 			ntfy_topic=$35,
 			pushover_enabled=$36,
 			pushover_priority=$37,
-			proxy_url=$38
+			proxy_url=$38,
+			manual=$39
 		WHERE
-			id=$39 AND user_id=$40
+			id=$40 AND user_id=$41
 	`
 
 	var categoryID *int64
@@ -444,6 +454,7 @@ func (s *Storage) UpdateFeed(feed *model.Feed) (err error) {
 		feed.PushoverEnabled,
 		feed.PushoverPriority,
 		feed.ProxyURL,
+		feed.Manual,
 		feed.ID,
 		feed.UserID,
 	)

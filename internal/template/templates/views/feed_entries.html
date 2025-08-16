@@ -46,6 +46,11 @@
                 <a class="page-link" href="{{ route "feedEntries" "feedID" .feed.ID }}">{{ icon "show-unread-entries" }}{{ t "menu.show_only_unread_entries" }}</a>
             </li>
             {{ end }}
+            {{ if .feed.Manual }}
+            <li>
+                <a class="page-link" href="{{ route "addEntry" }}?feed_id={{ .feed.ID }}">{{ icon "save" }}{{ t "menu.add_entry" }}</a>
+            </li>
+            {{ else }}
             <li>
                 <button
                     class="page-button"
@@ -57,6 +62,7 @@
                     data-url="{{ route "refreshFeed" "feedID" .feed.ID }}?forceRefresh=true"
                     data-no-action-url="{{ route "refreshFeed" "feedID" .feed.ID }}?forceRefresh=false">{{ icon "refresh" }}{{ t "menu.refresh_feed" }}</button>
             </li>
+            {{ end }}
             <li>
                 <a class="page-link" href="{{ route "editFeed" "feedID" .feed.ID }}">{{ icon "edit" }}{{ t "menu.edit_feed" }}</a>
             </li>
@@ -115,7 +121,7 @@
                         {{ if ne .Feed.Icon.IconID 0 }}
                         <img src="{{ route "feedIcon" "externalIconID" .Feed.Icon.ExternalIconID }}" width="16" height="16" loading="lazy" alt="">
                         {{ end }}
-                        {{ .Title }}
+                        {{ or .Title .URL }}
                     </a>
                 </h2>
                 <span class="category">

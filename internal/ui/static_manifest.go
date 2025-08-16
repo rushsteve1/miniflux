@@ -67,7 +67,7 @@ func (h *handler) showWebManifest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		displayMode = user.DisplayMode
-		printer := locale.NewPrinter(user.Language)
+		printer := locale.NewPrinter(request.UserLanguage(r))
 		labelNewFeed = printer.Print("menu.add_feed")
 		labelUnreadMenu = printer.Print("menu.unread")
 		labelStarredMenu = printer.Print("menu.starred")

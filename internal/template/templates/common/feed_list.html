@@ -12,7 +12,7 @@
                         {{ if and (.Icon) (gt .Icon.IconID 0) }}
                         <img src="{{ route "feedIcon" "externalIconID" .Icon.ExternalIconID }}" width="16" height="16" loading="lazy" alt="">
                         {{ end }}
-                        {{ if .Disabled }} 🚫 {{ end }}
+                        {{ if .Manual }} 📝 {{ else if .Disabled }} 🚫 {{ end }}
                         {{ .Title }}
                     </a>
                 </h2>
@@ -33,6 +33,7 @@
                 </span>
             </header>
             <div class="item-meta">
+                {{ if not .Manual }}
                 <ul class="item-meta-info">
                     <li class="item-meta-info-site-url" dir="auto">
                         <a href="{{ .SiteURL | safeURL }}" title="{{ .SiteURL }}" {{ if $.user.OpenExternalLinksInNewTab }}target="_blank"{{ else }}rel="noopener"{{ end }} data-original-link="{{ $.user.MarkReadOnView }}">
@@ -49,12 +50,15 @@
                     </li>
                     {{ end }}
                 </ul>
+                {{ end }}
                 <ul class="item-meta-icons">
+                    {{ if not .Manual }}
                     <li class="item-meta-icons-refresh">
                         <a href="{{ route "refreshFeed" "feedID" .ID }}" aria-describedby="feed-title-{{ .ID }}">
                             {{ icon "refresh" }}<span class="icon-label">{{ t "menu.refresh_feed" }}</span>
                         </a>
                     </li>
+                    {{ end }}
                     <li class="item-meta-icons-edit">
                         <a href="{{ route "editFeed" "feedID" .ID }}" aria-describedby="feed-title-{{ .ID }}">
                             {{ icon "edit" }}<span class="icon-label">{{ t "menu.edit_feed" }}</span>

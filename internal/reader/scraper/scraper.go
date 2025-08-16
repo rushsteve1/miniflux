@@ -11,6 +11,7 @@ import (
 	"miniflux.app/v2/internal/config"
 	"miniflux.app/v2/internal/reader/encoding"
 	"miniflux.app/v2/internal/reader/fetcher"
+	"miniflux.app/v2/internal/reader/obelisk"
 	"miniflux.app/v2/internal/reader/readability"
 	"miniflux.app/v2/internal/urllib"
 
@@ -72,6 +73,23 @@ func ScrapeWebsite(requestBuilder *fetcher.RequestBuilder, pageURL, rules string
 				return "", "", "", err
 			}
 		}
+		eg := errgroup.Group{}
+		eg.Go(func() error {
+			if rules != "" {
+				slog.Debug("Extracting content with custom rules",
+					"url", pageURL,
+					"rules", rules,
+				)
+				baseURL, extractedContent, err = findContentUsingCustomRules(document, rules)
+			} else {
+				slog.Debug("Extracting content with readability",
+					"url", pageURL,
+				)
+				baseURL, extractedContent, err = readability.ExtractContentFromDocument(document)
+			}
+			return err
+		})
+		eg.Wait()
 	}
 
 	if baseURL == "" {

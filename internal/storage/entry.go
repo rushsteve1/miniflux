@@ -82,7 +82,7 @@ func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
 			id=$6 AND user_id=$7
 	`
 
-	if _, err := s.db.Exec(
+	_, err := s.db.Exec(
 		query,
 		entry.Title,
 		entry.Content,
@@ -90,11 +90,27 @@ func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
 		truncatedTitle,
 		truncatedContent,
 		entry.ID,
-		entry.UserID); err != nil {
+		entry.UserID,
+	)
+	if err != nil {
 		return fmt.Errorf(`store: unable to update entry #%d: %v`, entry.ID, err)
 	}
 
 	return nil
+}
+
+func (s *Storage) CreateEntry(entry *model.Entry) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if err := s.createEntry(tx, entry); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // createEntry add a new entry.

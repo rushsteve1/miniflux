@@ -4,6 +4,7 @@
 package opml // import "miniflux.app/v2/internal/reader/opml"
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 
@@ -30,7 +31,7 @@ func (h *Handler) Export(userID int64) (string, error) {
 			FeedURL:      feed.FeedURL,
 			SiteURL:      feed.SiteURL,
 			Description:  feed.Description,
-			CategoryName: feed.Category.Title,
+			CategoryName: cmp.Or(feed.Category, model.Uncategorized(feed.UserID)).Title,
 		})
 	}
 
@@ -49,12 +50,7 @@ func (h *Handler) Import(userID int64, data io.Reader) error {
 			var category *model.Category
 			var err error
 
-			if subscription.CategoryName == "" {
-				category, err = h.store.FirstCategory(userID)
-				if err != nil {
-					return fmt.Errorf("opml: unable to find first category: %w", err)
-				}
-			} else {
+			if subscription.CategoryName != "" {
 				category, err = h.store.CategoryByTitle(userID, subscription.CategoryName)
 				if err != nil {
 					return fmt.Errorf("opml: unable to search category by title: %w", err)

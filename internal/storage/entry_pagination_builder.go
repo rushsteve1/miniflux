@@ -48,6 +48,8 @@ func (e *EntryPaginationBuilder) WithCategoryID(categoryID int64) {
 	if categoryID != 0 {
 		e.conditions = append(e.conditions, "f.category_id = $"+strconv.Itoa(len(e.args)+1))
 		e.args = append(e.args, categoryID)
+	} else {
+		e.conditions = append(e.conditions, "f.category_id IS NULL")
 	}
 }
 

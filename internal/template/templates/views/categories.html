@@ -50,9 +50,11 @@
                     <li class="item-meta-icons-feeds">
                         <a href="{{ route "categoryFeeds" "categoryID" .ID }}">{{ icon "feeds" }}<span class="icon-label">{{ t "page.categories.feeds" }}</span></a>
                     </li>
+                    {{ if ne .ID 0 }}
                     <li class="item-meta-icons-edit">
                         <a href="{{ route "editCategory" "categoryID" .ID }}">{{ icon "edit" }}<span class="icon-label">{{ t "menu.edit_category" }}</span></a>
                     </li>
+                    {{ end }}
                     {{ if eq (deRef .FeedCount) 0 }}
                     <li class="item-meta-icons-delete">
                         <button

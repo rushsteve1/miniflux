@@ -20,6 +20,18 @@ func (c *Category) String() string {
 	return fmt.Sprintf("ID=%d, UserID=%d, Title=%s", c.ID, c.UserID, c.Title)
 }
 
+// Uncategorized returns a fake category for the given user.
+func Uncategorized(userID int64) *Category {
+	return &Category{
+		ID: 0,
+		// In places where it is possible the title should be
+		// overriden with the localized version.
+		Title:        "Uncategorized",
+		UserID:       userID,
+		HideGlobally: false,
+	}
+}
+
 type CategoryCreationRequest struct {
 	Title        string `json:"title"`
 	HideGlobally bool   `json:"hide_globally"`

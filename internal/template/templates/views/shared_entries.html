@@ -58,7 +58,9 @@
                         {{ if $.user.OpenExternalLinksInNewTab }}target="_blank"{{ end }}>{{ icon "share" }}</a>
                     {{ end }}
                 </h2>
+                {{ if .Feed.Category }}
                 <span class="category"><a href="{{ route "categoryEntries" "categoryID" .Feed.Category.ID }}">{{ .Feed.Category.Title }}</a></span>
+                {{ end }}
             </header>
             <div class="item-meta">
                 <ul class="item-meta-info">

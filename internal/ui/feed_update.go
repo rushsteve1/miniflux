@@ -72,8 +72,9 @@ func (h *handler) updateFeed(w http.ResponseWriter, r *http.Request) {
 		html.OK(w, r, view.Render("edit_feed"))
 		return
 	}
-
-	err = h.store.UpdateFeed(feedForm.Merge(feed))
+	
+	feedModificationRequest.Patch(feed)
+	err = h.store.UpdateFeed(feed)
 	if err != nil {
 		html.ServerError(w, r, err)
 		return

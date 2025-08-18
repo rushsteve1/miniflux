@@ -44,8 +44,7 @@ func NewEntry() *Entry {
 		Enclosures: make(EnclosureList, 0),
 		Tags:       make([]string, 0),
 		Feed: &Feed{
-			Category: &Category{},
-			Icon:     &FeedIcon{},
+			Icon: &FeedIcon{},
 		},
 	}
 }

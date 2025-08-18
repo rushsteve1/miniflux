@@ -25,6 +25,16 @@ func (h *handler) showCategoryListPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uncategorized, err := h.store.UncategorizedWithCount(request.UserID(r))
+	if err != nil {
+		html.ServerError(w, r, err)
+		return
+	}
+
+	if *uncategorized.FeedCount > 0 {
+		categories = append(categories, uncategorized)
+	}
+
 	sess := session.New(h.store, request.SessionID(r))
 	view := view.New(h.tpl, r, sess)
 	view.Set("categories", categories)

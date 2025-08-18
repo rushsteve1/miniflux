@@ -26,6 +26,8 @@
             {{ range .categories }}
                 <option value="{{ .ID }}" {{ if eq $.form.CategoryID .ID }}selected="selected"{{ end }}>{{ .Title }}</option>
             {{ end }}
+            <hr/>
+            <option value="0" {{ if eq 0 $.form.CategoryID }}selected="selected"{{ end }}>{{ t "form.feed.option.uncategorized" }}</option>
         </select>
 
         <details>

@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/lib/pq"
+	"miniflux.app/v2/internal/locale"
 	"miniflux.app/v2/internal/model"
 )
 
@@ -38,27 +39,14 @@ func (s *Storage) CategoryIDExists(userID, categoryID int64) bool {
 
 // Category returns a category from the database.
 func (s *Storage) Category(userID, categoryID int64) (*model.Category, error) {
+	if categoryID == 0 {
+		return &model.Category{Title: "Uncategorized", UserID: userID}, nil
+	}
+
 	var category model.Category
 
 	query := `SELECT id, user_id, title, hide_globally FROM categories WHERE user_id=$1 AND id=$2`
 	err := s.db.QueryRow(query, userID, categoryID).Scan(&category.ID, &category.UserID, &category.Title, &category.HideGlobally)
-
-	switch {
-	case err == sql.ErrNoRows:
-		return nil, nil
-	case err != nil:
-		return nil, fmt.Errorf(`store: unable to fetch category: %v`, err)
-	default:
-		return &category, nil
-	}
-}
-
-// FirstCategory returns the first category for the given user.
-func (s *Storage) FirstCategory(userID int64) (*model.Category, error) {
-	query := `SELECT id, user_id, title, hide_globally FROM categories WHERE user_id=$1 ORDER BY title ASC LIMIT 1`
-
-	var category model.Category
-	err := s.db.QueryRow(query, userID).Scan(&category.ID, &category.UserID, &category.Title, &category.HideGlobally)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -162,6 +150,37 @@ func (s *Storage) CategoriesWithFeedCount(userID int64) (model.Categories, error
 	}
 
 	return categories, nil
+}
+
+func (s *Storage) UncategorizedWithCount(userID int64) (category model.Category, err error) {
+	query := `
+		SELECT
+			(SELECT count(*) FROM feeds WHERE feeds.category_id IS NULL) AS count,
+			(SELECT count(*)
+			   FROM feeds
+			     JOIN entries ON (feeds.id = entries.feed_id)
+			   WHERE feeds.category_id IS NULL AND entries.status = $1) AS count_unread
+		FROM categories c
+		WHERE
+			user_id=$2
+	`
+
+	category = model.Category{
+		Title:  "Uncategorized", // TODO translate this
+		UserID: userID,
+	}
+	row := s.db.QueryRow(query, model.EntryStatusUnread, userID)
+	if err := row.Scan(&category.FeedCount, &category.TotalUnread); err != nil {
+		return model.Category{}, fmt.Errorf(`store: unable to fetch uncategorized category row: %v`, err)
+	}
+
+	user, err := s.UserByID(userID)
+	if err != nil {
+		return model.Category{}, fmt.Errorf(`store: unable to fetch user: %v`, err)
+	}
+	category.Title = locale.NewPrinter(user.Language).Print("feed.uncategorized")
+
+	return category, nil
 }
 
 // CreateCategory creates a new category.

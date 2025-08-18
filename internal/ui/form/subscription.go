@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"miniflux.app/v2/internal/http/request"
 	"miniflux.app/v2/internal/locale"
 	"miniflux.app/v2/internal/validator"
 )
@@ -35,7 +36,7 @@ type SubscriptionForm struct {
 
 // Validate makes sure the form values locale.are valid.
 func (s *SubscriptionForm) Validate() *locale.LocalizedError {
-	if s.URL == "" || s.CategoryID == 0 {
+	if s.URL == "" {
 		return locale.NewLocalizedError("error.feed_mandatory_fields")
 	}
 
@@ -66,7 +67,7 @@ func (s *SubscriptionForm) Validate() *locale.LocalizedError {
 func NewSubscriptionForm(r *http.Request) *SubscriptionForm {
 	categoryID, err := strconv.Atoi(r.FormValue("category_id"))
 	if err != nil {
-		categoryID = 0
+		categoryID = request.QueryIntParam(r, "category_id", 0)
 	}
 
 	return &SubscriptionForm{

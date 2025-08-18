@@ -28,6 +28,7 @@ export PGPASSWORD := postgres
 	add-string \
 	test \
 	lint \
+	format \
 	integration-test \
 	clean-integration-test \
 	docker-image \
@@ -98,10 +99,14 @@ add-string:
 test:
 	go test -cover -race -count=1 ./...
 
-lint:
+lint: format
 	go vet ./...
 	staticcheck ./...
-	golangci-lint run --disable errcheck --enable sqlclosecheck --enable misspell --enable gofmt --enable goimports --enable whitespace
+	golangci-lint run --disable errcheck --enable sqlclosecheck --enable misspell --enable whitespace
+
+format:
+	go fmt ./...
+	golangci-lint fmt --enable gofmt --enable goimports
 
 integration-test:
 	psql -U postgres -c 'drop database if exists miniflux_test;'

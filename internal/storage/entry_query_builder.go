@@ -135,6 +135,8 @@ func (e *EntryQueryBuilder) WithCategoryID(categoryID int64) *EntryQueryBuilder 
 	if categoryID > 0 {
 		e.conditions = append(e.conditions, "f.category_id = $"+strconv.Itoa(len(e.args)+1))
 		e.args = append(e.args, categoryID)
+	} else {
+		e.conditions = append(e.conditions, "f.category_id IS NULL")
 	}
 	return e
 }
@@ -323,6 +325,9 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 		var iconID sql.NullInt64
 		var externalIconID sql.NullString
 		var tz string
+		var categoryID sql.NullInt64
+		var categoryTitle sql.NullString
+		var categoryHideGlobally sql.NullBool
 
 		entry := model.NewEntry()
 
@@ -349,9 +354,9 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 			&entry.Feed.SiteURL,
 			&entry.Feed.Description,
 			&entry.Feed.CheckedAt,
-			&entry.Feed.Category.ID,
-			&entry.Feed.Category.Title,
-			&entry.Feed.Category.HideGlobally,
+			&categoryID,
+			&categoryTitle,
+			&categoryHideGlobally,
 			&entry.Feed.ScraperRules,
 			&entry.Feed.RewriteRules,
 			&entry.Feed.Crawler,
@@ -377,6 +382,20 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 			entry.Feed.Icon.IconID = 0
 		}
 
+		if categoryID.Valid {
+			entry.Feed.Category = &model.Category{
+				ID:           categoryID.Int64,
+				Title:        categoryTitle.String,
+				HideGlobally: categoryHideGlobally.Bool,
+				UserID:       entry.UserID,
+			}
+		} else {
+			entry.Feed.Category = &model.Category{
+				Title:  "Uncategorized",
+				UserID: entry.UserID,
+			}
+		}
+
 		// Make sure that timestamp fields contain timezone information (API)
 		entry.Date = timezone.Convert(tz, entry.Date)
 		entry.CreatedAt = timezone.Convert(tz, entry.CreatedAt)
@@ -386,7 +405,6 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 		entry.Feed.ID = entry.FeedID
 		entry.Feed.UserID = entry.UserID
 		entry.Feed.Icon.FeedID = entry.FeedID
-		entry.Feed.Category.UserID = entry.UserID
 
 		entries = append(entries, entry)
 		entryMap[entry.ID] = entry

@@ -32,6 +32,16 @@ func NewClient(webhookURL, webhookSecret string) *Client {
 }
 
 func (c *Client) SendSaveEntryWebhookEvent(entry *model.Entry) error {
+	var webhookCategoryID int64
+	var webhookCategory *WebhookCategory
+	if entry.Feed.Category != nil {
+		webhookCategoryID = entry.Feed.Category.ID
+		webhookCategory = &WebhookCategory{
+			ID:    entry.Feed.Category.ID,
+			Title: entry.Feed.Category.Title,
+		}
+	}
+
 	return c.makeRequest(SaveEntryEventType, &WebhookSaveEntryEvent{
 		EventType: SaveEntryEventType,
 		Entry: &WebhookEntry{
@@ -56,8 +66,8 @@ func (c *Client) SendSaveEntryWebhookEvent(entry *model.Entry) error {
 			Feed: &WebhookFeed{
 				ID:         entry.Feed.ID,
 				UserID:     entry.Feed.UserID,
-				CategoryID: entry.Feed.Category.ID,
-				Category:   &WebhookCategory{ID: entry.Feed.Category.ID, Title: entry.Feed.Category.Title},
+				CategoryID: webhookCategoryID,
+				Category:   webhookCategory,
 				FeedURL:    entry.Feed.FeedURL,
 				SiteURL:    entry.Feed.SiteURL,
 				Title:      entry.Feed.Title,
@@ -95,13 +105,24 @@ func (c *Client) SendNewEntriesWebhookEvent(feed *model.Feed, entries model.Entr
 			Tags:        entry.Tags,
 		})
 	}
+
+	var webhookCategoryID int64
+	var webhookCategory *WebhookCategory
+	if feed.Category != nil {
+		webhookCategoryID = feed.Category.ID
+		webhookCategory = &WebhookCategory{
+			ID:    feed.Category.ID,
+			Title: feed.Category.Title,
+		}
+	}
+
 	return c.makeRequest(NewEntriesEventType, &WebhookNewEntriesEvent{
 		EventType: NewEntriesEventType,
 		Feed: &WebhookFeed{
 			ID:         feed.ID,
 			UserID:     feed.UserID,
-			CategoryID: feed.Category.ID,
-			Category:   &WebhookCategory{ID: feed.Category.ID, Title: feed.Category.Title},
+			CategoryID: webhookCategoryID,
+			Category:   webhookCategory,
 			FeedURL:    feed.FeedURL,
 			SiteURL:    feed.SiteURL,
 			Title:      feed.Title,

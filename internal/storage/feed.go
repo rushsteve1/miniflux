@@ -54,9 +54,14 @@ func (s *Storage) CheckedAt(userID, feedID int64) (time.Time, error) {
 
 // CategoryFeedExists returns true if the given feed exists that belongs to the given category.
 func (s *Storage) CategoryFeedExists(userID, categoryID, feedID int64) bool {
+	var cID *int64
+	if categoryID > 0 {
+		cID = &categoryID
+	}
+
 	var result bool
 	query := `SELECT true FROM feeds WHERE user_id=$1 AND category_id=$2 AND id=$3 LIMIT 1`
-	s.db.QueryRow(query, userID, categoryID, feedID).Scan(&result)
+	s.db.QueryRow(query, userID, cID, feedID).Scan(&result)
 	return result
 }
 
@@ -270,12 +275,18 @@ func (s *Storage) CreateFeed(feed *model.Feed) error {
 		RETURNING
 			id
 	`
+
+	var categoryID *int64
+	if feed.Category != nil && feed.Category.ID > 0 {
+		categoryID = &feed.Category.ID
+	}
+
 	err := s.db.QueryRow(
 		sql,
 		feed.FeedURL,
 		feed.SiteURL,
 		feed.Title,
-		feed.Category.ID,
+		categoryID,
 		feed.UserID,
 		feed.EtagHeader,
 		feed.LastModifiedHeader,
@@ -388,11 +399,17 @@ func (s *Storage) UpdateFeed(feed *model.Feed) (err error) {
 		WHERE
 			id=$39 AND user_id=$40
 	`
+
+	var categoryID *int64
+	if feed.Category != nil && feed.Category.ID > 0 {
+		categoryID = &feed.Category.ID
+	}
+
 	_, err = s.db.Exec(query,
 		feed.FeedURL,
 		feed.SiteURL,
 		feed.Title,
-		feed.Category.ID,
+		categoryID,
 		feed.EtagHeader,
 		feed.LastModifiedHeader,
 		feed.CheckedAt,

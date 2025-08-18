@@ -4,6 +4,7 @@
 package model // import "miniflux.app/v2/internal/model"
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"time"
@@ -87,13 +88,15 @@ func (f *Feed) String() string {
 		f.FeedURL,
 		f.SiteURL,
 		f.Title,
-		f.Category,
+		cmp.Or(f.Category, &Category{Title: "Uncategorized", UserID: f.UserID}),
 	)
 }
 
 // WithCategoryID initializes the category attribute of the feed.
 func (f *Feed) WithCategoryID(categoryID int64) {
-	f.Category = &Category{ID: categoryID}
+	if categoryID > 0 {
+		f.Category = &Category{ID: categoryID}
+	}
 }
 
 // WithTranslatedErrorMessage adds a new error message and increment the error counter.
@@ -278,6 +281,8 @@ func (f *FeedModificationRequest) Patch(feed *Feed) {
 
 	if f.CategoryID != nil && *f.CategoryID > 0 {
 		feed.Category.ID = *f.CategoryID
+	} else {
+		feed.Category = nil
 	}
 
 	if f.Disabled != nil {

@@ -638,6 +638,11 @@ func (s *Storage) MarkFeedAsRead(userID, feedID int64, before time.Time) error {
 
 // MarkCategoryAsRead updates all category entries to the read status.
 func (s *Storage) MarkCategoryAsRead(userID, categoryID int64, before time.Time) error {
+	var cID *int64
+	if categoryID != 0 {
+		cID = &categoryID
+	}
+
 	query := `
 		UPDATE
 			entries
@@ -657,7 +662,7 @@ func (s *Storage) MarkCategoryAsRead(userID, categoryID int64, before time.Time)
 		AND
 			feeds.category_id=$5
 	`
-	result, err := s.db.Exec(query, model.EntryStatusRead, userID, model.EntryStatusUnread, before, categoryID)
+	result, err := s.db.Exec(query, model.EntryStatusRead, userID, model.EntryStatusUnread, before, cID)
 	if err != nil {
 		return fmt.Errorf(`store: unable to mark category entries as read: %v`, err)
 	}

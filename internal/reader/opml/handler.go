@@ -25,12 +25,17 @@ func (h *Handler) Export(userID int64) (string, error) {
 
 	subscriptions := make([]subcription, 0, len(feeds))
 	for _, feed := range feeds {
+		title := "Uncategorized"
+		if feed.Category != nil {
+			title = feed.Category.Title
+		}
+
 		subscriptions = append(subscriptions, subcription{
 			Title:        feed.Title,
 			FeedURL:      feed.FeedURL,
 			SiteURL:      feed.SiteURL,
 			Description:  feed.Description,
-			CategoryName: feed.Category.Title,
+			CategoryName: title,
 		})
 	}
 
@@ -49,12 +54,7 @@ func (h *Handler) Import(userID int64, data io.Reader) error {
 			var category *model.Category
 			var err error
 
-			if subscription.CategoryName == "" {
-				category, err = h.store.FirstCategory(userID)
-				if err != nil {
-					return fmt.Errorf("opml: unable to find first category: %w", err)
-				}
-			} else {
+			if subscription.CategoryName != "" {
 				category, err = h.store.CategoryByTitle(userID, subscription.CategoryName)
 				if err != nil {
 					return fmt.Errorf("opml: unable to search category by title: %w", err)

@@ -46,6 +46,10 @@ func (f *FeedQueryBuilder) WithCategoryID(categoryID int64) *FeedQueryBuilder {
 		f.counterConditions = append(f.counterConditions, "f.category_id = $"+strconv.Itoa(len(f.counterArgs)+1))
 		f.counterArgs = append(f.counterArgs, categoryID)
 		f.counterJoinFeeds = true
+	} else {
+		f.conditions = append(f.conditions, "f.category_id IS NULL")
+		f.counterConditions = append(f.counterConditions, "f.category_id IS NULL")
+		f.counterJoinFeeds = true
 	}
 	return f
 }
@@ -210,7 +214,9 @@ func (f *FeedQueryBuilder) GetFeeds() (model.Feeds, error) {
 		var iconID sql.NullInt64
 		var externalIconID sql.NullString
 		var tz string
-		feed.Category = &model.Category{}
+		var categoryID sql.NullInt64
+		var categoryTitle sql.NullString
+		var categoryHideGlobal sql.NullBool
 
 		err := rows.Scan(
 			&feed.ID,
@@ -243,9 +249,9 @@ func (f *FeedQueryBuilder) GetFeeds() (model.Feeds, error) {
 			&feed.Disabled,
 			&feed.NoMediaPlayer,
 			&feed.HideGlobally,
-			&feed.Category.ID,
-			&feed.Category.Title,
-			&feed.Category.HideGlobally,
+			&categoryID,
+			&categoryTitle,
+			&categoryHideGlobal,
 			&iconID,
 			&externalIconID,
 			&tz,
@@ -281,10 +287,23 @@ func (f *FeedQueryBuilder) GetFeeds() (model.Feeds, error) {
 			}
 		}
 
+		if categoryID.Valid {
+			feed.Category = &model.Category{
+				ID:           categoryID.Int64,
+				Title:        categoryTitle.String,
+				HideGlobally: categoryHideGlobal.Bool,
+				UserID:       feed.UserID,
+			}
+		} else {
+			feed.Category = &model.Category{
+				Title:  "Uncategorized",
+				UserID: feed.UserID,
+			}
+		}
+
 		feed.NumberOfVisibleEntries = feed.ReadCount + feed.UnreadCount
 		feed.CheckedAt = timezone.Convert(tz, feed.CheckedAt)
 		feed.NextCheckAt = timezone.Convert(tz, feed.NextCheckAt)
-		feed.Category.UserID = feed.UserID
 		feeds = append(feeds, &feed)
 	}
 

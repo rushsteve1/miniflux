@@ -11,7 +11,7 @@ import (
 
 // ValidateFeedCreation validates feed creation.
 func ValidateFeedCreation(store *storage.Storage, userID int64, request *model.FeedCreationRequest) *locale.LocalizedError {
-	if request.FeedURL == "" || request.CategoryID <= 0 {
+	if request.FeedURL == "" {
 		return locale.NewLocalizedError("error.feed_mandatory_fields")
 	}
 
@@ -71,12 +71,6 @@ func ValidateFeedModification(store *storage.Storage, userID, feedID int64, requ
 	if request.Title != nil {
 		if *request.Title == "" {
 			return locale.NewLocalizedError("error.feed_title_not_empty")
-		}
-	}
-
-	if request.CategoryID != nil {
-		if !store.CategoryIDExists(userID, *request.CategoryID) {
-			return locale.NewLocalizedError("error.feed_category_not_found")
 		}
 	}
 

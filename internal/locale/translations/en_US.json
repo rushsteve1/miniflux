@@ -52,6 +52,7 @@
     "entry.starred.toggle.on": "Star",
     "entry.comments.label": "Comments",
     "entry.comments.title": "View Comments",
+    "entry.completed": "completed",
     "entry.estimated_reading_time": [
         "%d minute read",
         "%d minutes read"

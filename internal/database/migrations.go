@@ -1151,4 +1151,12 @@ var migrations = []func(tx *sql.Tx) error{
 		_, err = tx.Exec(sql)
 		return err
 	},
+	func(tx *sql.Tx) (err error) {
+		sql := `
+			ALTER TABLE entries
+				ADD COLUMN scroll_percent float not null default 0.0;
+		`
+		_, err = tx.Exec(sql)
+		return err
+	},
 }

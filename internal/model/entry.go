@@ -18,25 +18,26 @@ const (
 
 // Entry represents a feed item in the system.
 type Entry struct {
-	ID          int64         `json:"id"`
-	UserID      int64         `json:"user_id"`
-	FeedID      int64         `json:"feed_id"`
-	Status      string        `json:"status"`
-	Hash        string        `json:"hash"`
-	Title       string        `json:"title"`
-	URL         string        `json:"url"`
-	CommentsURL string        `json:"comments_url"`
-	Date        time.Time     `json:"published_at"`
-	CreatedAt   time.Time     `json:"created_at"`
-	ChangedAt   time.Time     `json:"changed_at"`
-	Content     string        `json:"content"`
-	Author      string        `json:"author"`
-	ShareCode   string        `json:"share_code"`
-	Starred     bool          `json:"starred"`
-	ReadingTime int           `json:"reading_time"`
-	Enclosures  EnclosureList `json:"enclosures"`
-	Feed        *Feed         `json:"feed,omitempty"`
-	Tags        []string      `json:"tags"`
+	ID            int64         `json:"id"`
+	UserID        int64         `json:"user_id"`
+	FeedID        int64         `json:"feed_id"`
+	Status        string        `json:"status"`
+	Hash          string        `json:"hash"`
+	Title         string        `json:"title"`
+	URL           string        `json:"url"`
+	CommentsURL   string        `json:"comments_url"`
+	Date          time.Time     `json:"published_at"`
+	CreatedAt     time.Time     `json:"created_at"`
+	ChangedAt     time.Time     `json:"changed_at"`
+	Content       string        `json:"content"`
+	Author        string        `json:"author"`
+	ShareCode     string        `json:"share_code"`
+	Starred       bool          `json:"starred"`
+	ReadingTime   int           `json:"reading_time"`
+	Enclosures    EnclosureList `json:"enclosures"`
+	Feed          *Feed         `json:"feed,omitempty"`
+	Tags          []string      `json:"tags"`
+	ScrollPercent float32       `json:"scroll_percent"`
 }
 
 func NewEntry() *Entry {
@@ -64,6 +65,13 @@ func (e *Entry) ShouldMarkAsReadOnView(user *User) bool {
 
 	// The user wants to mark as read on view
 	return user.MarkReadOnView
+}
+
+func (e *Entry) UnreadScrollPercent() float32 {
+	if e.Status == EntryStatusUnread {
+		return e.ScrollPercent
+	}
+	return 0.0
 }
 
 // Entries represents a list of entries.

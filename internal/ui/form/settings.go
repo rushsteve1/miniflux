@@ -54,6 +54,8 @@ type SettingsForm struct {
 	KeepFilterEntryRules      string
 	AlwaysOpenExternalLinks   bool
 	OpenExternalLinksInNewTab bool
+	RestoreScroll             bool
+	ScrollBehavior            string
 }
 
 // MarkAsReadBehavior returns the MarkReadBehavior from the given MarkReadOnView and MarkReadOnMediaPlayerCompletion values.
@@ -118,6 +120,8 @@ func (s *SettingsForm) Merge(user *model.User) *model.User {
 	user.KeepFilterEntryRules = s.KeepFilterEntryRules
 	user.AlwaysOpenExternalLinks = s.AlwaysOpenExternalLinks
 	user.OpenExternalLinksInNewTab = s.OpenExternalLinksInNewTab
+	user.RestoreScroll = s.RestoreScroll
+	user.ScrollBehavior = s.ScrollBehavior
 
 	MarkReadOnView, MarkReadOnMediaPlayerCompletion := extractMarkAsReadBehavior(s.MarkReadBehavior)
 	user.MarkReadOnView = MarkReadOnView

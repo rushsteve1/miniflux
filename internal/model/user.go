@@ -9,6 +9,12 @@ import (
 	"miniflux.app/v2/internal/timezone"
 )
 
+const (
+	ScrollBehaviorAuto    = "auto"
+	ScrollBehaviorInstant = "smooth"
+	ScrollBehaviorSmooth  = "smooth"
+)
+
 // User represents a user in the system.
 type User struct {
 	ID                              int64      `json:"id"`
@@ -43,6 +49,8 @@ type User struct {
 	KeepFilterEntryRules            string     `json:"keep_filter_entry_rules"`
 	AlwaysOpenExternalLinks         bool       `json:"always_open_external_links"`
 	OpenExternalLinksInNewTab       bool       `json:"open_external_links_in_new_tab"`
+	RestoreScroll                   bool       `json:"restore_scroll"`
+	ScrollBehavior                  string     `json:"scroll_behavior"`
 }
 
 // UserCreationRequest represents the request to create a user.
@@ -86,6 +94,8 @@ type UserModificationRequest struct {
 	KeepFilterEntryRules            *string  `json:"keep_filter_entry_rules"`
 	AlwaysOpenExternalLinks         *bool    `json:"always_open_external_links"`
 	OpenExternalLinksInNewTab       *bool    `json:"open_external_links_in_new_tab"`
+	RestoreScroll                   *bool    `json:"restore_scroll"`
+	ScrollBehavior                  *string  `json:"scroll_behavior"`
 }
 
 // Patch updates the User object with the modification request.
@@ -208,6 +218,14 @@ func (u *UserModificationRequest) Patch(user *User) {
 
 	if u.OpenExternalLinksInNewTab != nil {
 		user.OpenExternalLinksInNewTab = *u.OpenExternalLinksInNewTab
+	}
+
+	if u.RestoreScroll != nil {
+		user.RestoreScroll = *u.RestoreScroll
+	}
+
+	if u.ScrollBehavior != nil {
+		user.ScrollBehavior = *u.ScrollBehavior
 	}
 }
 

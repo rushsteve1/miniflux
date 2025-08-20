@@ -1341,4 +1341,16 @@ var migrations = [...]func(tx *sql.Tx) error{
 
 		return nil
 	},
+	func(tx *sql.Tx) (err error) {
+		sql := `
+			ALTER TABLE entries
+				ADD COLUMN scroll_percent float not null default 0.0,
+				ALTER COLUMN author SET NOT NULL; -- Already required but not previously enforced
+			ALTER TABLE users
+				ADD COLUMN restore_scroll boolean not null default false,
+				ADD COLUMN scroll_behavior text default 'auto';
+		`
+		_, err = tx.Exec(sql)
+		return err
+	},
 }

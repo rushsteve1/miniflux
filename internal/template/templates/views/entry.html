@@ -221,7 +221,11 @@
             <span class="entry-reading-time">
                 {{ plural "entry.estimated_reading_time" .entry.ReadingTime .entry.ReadingTime }}
             </span>
+            &centerdot;
             {{ end }}
+            <span class="entry-scroll-percent">
+                {{ percent .entry.ScrollPercent }}% {{ t "entry.completed" }}
+            </span>
         </div>
     </header>
 </section>
@@ -236,7 +240,12 @@
 </div>
 {{ end }}
 {{ end }}
-<article class="entry-content {{ if ne $.user.GestureNav "none" }}gesture-nav-{{ $.user.GestureNav }}{{ end }}" dir="auto">
+<article
+    class="entry-content {{ if ne $.user.GestureNav "none" }}gesture-nav-{{ $.user.GestureNav }}{{ end }}"
+    data-scroll-percent="{{ if .user.RestoreScroll }}{{ .entry.UnreadScrollPercent }}{{ end }}"
+    data-scroll-url="{{ route "scrollEntry" "entryID" .entry.ID }}"
+    dir="auto"
+    >
     {{ if not .entry.Feed.NoMediaPlayer }}
         {{ $mediaPlayerEnclosure := .entry.Enclosures.FindMediaPlayerEnclosure }}
 

@@ -1151,4 +1151,44 @@ var migrations = []func(tx *sql.Tx) error{
 		_, err = tx.Exec(sql)
 		return err
 	},
+	func(tx *sql.Tx) (err error) {
+		sql := `
+			ALTER TABLE entries
+				ALTER COLUMN author SET NOT NULL;
+		`
+		_, err = tx.Exec(sql)
+		return err
+	},
+	func(tx *sql.Tx) (err error) {
+		sql := `
+			ALTER TABLE entries
+				ADD COLUMN scroll_percent float not null default 0.0;
+			ALTER TABLE users
+				ADD COLUMN restore_scroll boolean not null default false,
+				ADD COLUMN scroll_behavior text default 'auto';
+		`
+		_, err = tx.Exec(sql)
+		return err
+	},
+	func(tx *sql.Tx) (err error) {
+		sql := `
+			ALTER TABLE feeds ADD COLUMN manual bool NOT NULL DEFAULT false;
+		`
+		_, err = tx.Exec(sql)
+		return err
+	},
+	func(tx *sql.Tx) (err error) {
+		sql := `
+			ALTER TABLE feeds ALTER COLUMN category_id DROP NOT NULL;
+		`
+		_, err = tx.Exec(sql)
+		return err
+	},
+	func(tx *sql.Tx) (err error) {
+		sql := `
+			ALTER TABLE entries ADD COLUMN content_html text NOT NULL DEFAULT '';
+		`
+		_, err = tx.Exec(sql)
+		return err
+	},
 }

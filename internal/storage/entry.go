@@ -77,7 +77,9 @@ func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
 			title=$1,
 			content=$2,
 			reading_time=$3,
-			document_vectors = setweight(to_tsvector($4), 'A') || setweight(to_tsvector($5), 'B')
+			document_vectors = setweight(to_tsvector($4), 'A') || setweight(to_tsvector($5), 'B'),
+			scroll_percent = 0
++			content_html=$6
 		WHERE
 			id=$6 AND user_id=$7
 	`
@@ -442,6 +444,7 @@ func (s *Storage) SetEntriesStatus(userID int64, entryIDs []int64, status string
 			entries
 		SET
 			status=$1,
+			scroll_percent=0,
 			changed_at=now()
 		WHERE
 			user_id=$2 AND
@@ -705,6 +708,34 @@ func (s *Storage) UnshareEntry(userID int64, entryID int64) (err error) {
 		err = fmt.Errorf(`store: unable to remove share code for entry #%d: %v`, entryID, err)
 	}
 	return
+}
+
+// SCROLL_THRESHOLD for marking an entry as read.
+const SCROLL_THRESHOLD float32 = 0.90
+
+// UpdateEntryScrollPercent updates the scroll percent and status for the given entry.
+func (s *Storage) UpdateEntryScrollPercent(entryID int64, scrollPercent float32) (err error) {
+	status := ""
+	if scrollPercent > SCROLL_THRESHOLD {
+		status += fmt.Sprintf(", status = '%s'", model.EntryStatusRead)
+	}
+
+	// Only update if the scroll percent has increased
+	query := `UPDATE entries SET scroll_percent = $1 %s WHERE id=$2;`
+	_, err = s.db.Exec(fmt.Sprintf(query, status), scrollPercent, entryID)
+	if err != nil {
+		err = fmt.Errorf(`store: unable to update scroll percent for entry #%d: %v`, entryID, err)
+	}
+	return
+}
+
+func (s *Storage) RemoveEntry(entryID int64) error {
+	query := `DELETE FROM entries WHERE id=$1`
+	_, err := s.db.Exec(query, entryID)
+	if err != nil {
+		err = fmt.Errorf(`store: unable to remove entry #%d: %v`, entryID, err)
+	}
+	return err
 }
 
 func truncateTitleAndContentForTSVectorField(title, content string) (string, string) {

@@ -118,6 +118,8 @@
 
         <label><input type="checkbox" name="show_reading_time" value="1" {{ if .form.ShowReadingTime }}checked{{ end }}> {{ t "form.prefs.label.show_reading_time" }}</label>
 
+        <label><input type="checkbox" name="restore_scroll" value="1" {{ if .form.RestoreScroll }}checked{{ end }}> {{ t "form.prefs.label.show_reading_time" }}</label>
+
         <label><input type="radio" name="mark_read_behavior" value="{{ .readBehaviors.NoAutoMarkAsRead }}"
                       {{ if eq .form.MarkReadBehavior .readBehaviors.NoAutoMarkAsRead }}checked{{end}}                          > {{ t "form.prefs.label.mark_read_manually" }}</label>
         <label><input type="radio" name="mark_read_behavior" value="{{ .readBehaviors.MarkAsReadOnView }}"
@@ -201,6 +203,13 @@
             <option value="none" {{ if eq "none" $.form.GestureNav }}selected="selected"{{ end }}>{{ t "form.prefs.select.none" }}</option>
             <option value="tap" {{ if eq "tap" $.form.GestureNav }}selected="selected"{{ end }}>{{ t "form.prefs.select.tap" }}</option>
             <option value="swipe" {{ if eq "swipe" $.form.GestureNav }}selected="selected"{{ end }}>{{ t "form.prefs.select.swipe" }}</option>
+        </select>
+
+        <label for="form-scroll-behavior">{{ t "form.prefs.label.scroll_behavior" }}</label>
+        <select id="form-scroll-behavior" name="scroll_behavior">
+            <option value="auto" {{ if eq .form.ScrollBehavior "auto" }}selected{{end}}>{{ t "form.prefs.select.scroll_auto" }}</option>
+            <option value="instant" {{ if eq .form.ScrollBehavior "instant" }}selected{{end}}>{{ t "form.prefs.select.scroll_instant" }}</option>
+            <option value="smooth" {{ if eq .form.ScrollBehavior "smooth" }}selected{{end}}>{{ t "form.prefs.select.scroll_smooth" }}</option>
         </select>
 
         <label for="form-entries-per-page">{{ t "form.prefs.label.entries_per_page" }}</label>

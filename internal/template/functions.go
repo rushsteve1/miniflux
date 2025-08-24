@@ -102,6 +102,9 @@ func (f *funcMap) Map() template.FuncMap {
 		"subtract": func(a, b int) int {
 			return a - b
 		},
+		"joinStrings": func(tags []string) string {
+			return strings.Join(tags, ", ")
+		},
 
 		// These functions are overridden at runtime after parsing.
 		"elapsed": func(timezone string, t time.Time) string {

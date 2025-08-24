@@ -108,6 +108,8 @@ func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	uiRouter.HandleFunc("/entry/bookmark/{entryID}", handler.toggleStarred).Name("toggleBookmark").Methods(http.MethodPost)
 	uiRouter.HandleFunc("/entry/create", handler.showAddEntryPage).Name("addEntry").Methods(http.MethodGet)
 	uiRouter.HandleFunc("/entry/create", handler.submitEntry).Name("submitEntry").Methods(http.MethodPost)
+	uiRouter.HandleFunc("/entry/{entryID}/edit", handler.showEditEntryPage).Name("editEntry").Methods(http.MethodGet)
+	uiRouter.HandleFunc("/entry/{entryID}/update", handler.updateEntry).Name("updateEntry").Methods(http.MethodPost)
 
 	// Share pages.
 	uiRouter.HandleFunc("/entry/share/{entryID}", handler.createSharedEntry).Name("shareEntry").Methods(http.MethodPost)

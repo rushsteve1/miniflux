@@ -16,6 +16,14 @@ import (
 	"github.com/lib/pq"
 )
 
+// EntryExists checks if the given entry exists.
+func (s *Storage) EntryExists(userID, entryID int64) bool {
+	var result bool
+	query := `SELECT true FROM entries WHERE user_id=$1 AND id=$2 LIMIT 1`
+	s.db.QueryRow(query, userID, entryID).Scan(&result)
+	return result
+}
+
 // CountAllEntries returns the number of entries for each status in the database.
 func (s *Storage) CountAllEntries() map[string]int64 {
 	rows, err := s.db.Query(`SELECT status, count(*) FROM entries GROUP BY status`)
@@ -187,6 +195,20 @@ func (s *Storage) createEntry(tx *sql.Tx, entry *model.Entry) error {
 	}
 
 	return nil
+}
+
+func (s *Storage) UpdateEntry(entry *model.Entry) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if err := s.updateEntry(tx, entry); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // updateEntry updates an entry when a feed is refreshed.

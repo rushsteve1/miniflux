@@ -7,6 +7,7 @@
     "action.login": "Kirjaudu sisään",
     "action.or": "tai",
     "action.remove": "Poista",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Poista tämä syöte",
     "action.save": "Tallenna",
     "action.subscribe": "Tilaa",
@@ -49,6 +50,9 @@
     "enclosure_media_controls.speed.slower.title": "Hitaampi %sx",
     "entry.comments.label": "Kommentit",
     "entry.comments.title": "Näytä kommentit",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "%d minuutin lukuaika",
         "%d minuutin lukuaika"
@@ -478,6 +482,7 @@
     ],
     "page.category_label": "Category: %s",
     "page.edit_category.title": "Muokkaa kategoria: %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "ETag-otsikko:",
     "page.edit_feed.last_check": "Viimeisin tarkistus:",
     "page.edit_feed.last_modified_header": "LastModified-otsikko:",

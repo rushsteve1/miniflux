@@ -7,6 +7,7 @@
     "action.login": "Teng-lo̍k",
     "action.or": "ah-sī",
     "action.remove": "Thâi tiāu",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Thâi tiāu chit ê siau-sit lâi-goân",
     "action.save": "Pó-chûn",
     "action.subscribe": "Tēng",
@@ -48,6 +49,9 @@
     "enclosure_media_controls.speed.slower.title": "Pàng bān %sx",
     "entry.comments.label": "Hôe-èng",
     "entry.comments.title": "Khòaⁿ hôe-èng",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "Ài %d hun-cheng lâi tha̍k"
     ],
@@ -473,6 +477,7 @@
     ],
     "page.category_label": "Lūi-pia̍t: %s",
     "page.edit_category.title": "Pian-chi̍p lūi-pia̍t: %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "ETag piau-thâu:",
     "page.edit_feed.last_check": "Siōng-bóe pái kiám-cha sî-kan",
     "page.edit_feed.last_modified_header": "Siōng-bóe pái siu-kái piau-thâu:",

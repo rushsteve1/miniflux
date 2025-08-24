@@ -189,6 +189,20 @@ func (s *Storage) createEntry(tx *sql.Tx, entry *model.Entry) error {
 	return nil
 }
 
+func (s *Storage) UpdateEntry(entry *model.Entry) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if err := s.updateEntry(tx, entry); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
 // updateEntry updates an entry when a feed is refreshed.
 // Note: we do not update the published date because some feeds do not contains any date,
 // it default to time.Now() which could change the order of items on the history page.

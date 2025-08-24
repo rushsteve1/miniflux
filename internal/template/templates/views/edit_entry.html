@@ -1,0 +1,118 @@
+{{ define "title"}}{{ t "page.edit_entry.title" .entry.Title }}{{ end }}
+
+{{ define "page_header"}}
+<section class="page-header" aria-labelledby="page-header-title">
+    <h1 id="page-header-title">{{ t "page.edit_entry.title" (or .entry.Title .entry.URL) }}</h1>
+    <nav aria-label="{{ t "page.edit_entry.title" (or .entry.Title .entry.URL) }} {{ t "menu.title" }}">
+        <ul>
+            <li>
+                <button
+                    class="page-button"
+                    title="{{ t "entry.status.title" }}"
+                    data-toggle-status="true"
+                    data-label-loading="{{ t "entry.state.saving" }}"
+                    data-label-unread="{{ t "entry.status.mark_as_unread" }}"
+                    data-label-read="{{ t "entry.status.mark_as_read" }}"
+                    data-toast-unread="{{ t "entry.status.toast.unread" }}"
+                    data-toast-read="{{ t "entry.status.toast.read" }}"
+                    data-value="{{ if eq .entry.Status "read" }}read{{ else }}unread{{ end }}"
+                    >{{ if eq .entry.Status "unread" }}{{ icon "read" }}{{ else }}{{ icon "unread" }}{{ end }}<span class="icon-label">{{ if eq .entry.Status "unread" }}{{ t "entry.status.mark_as_read" }}{{ else }}{{ t "entry.status.mark_as_unread" }}{{ end }}</span></button>
+            </li>
+            <li>
+                <button
+                    class="page-button"
+                    data-toggle-starred="true"
+                    data-star-url="{{ route "toggleStarred" "entryID" .entry.ID }}"
+                    data-label-loading="{{ t "entry.state.saving" }}"
+                    data-label-star="{{ t "entry.starred.toggle.on" }}"
+                    data-label-unstar="{{ t "entry.starred.toggle.off" }}"
+                    data-toast-star="{{ t "entry.starred.toast.on" }}"
+                    data-toast-unstar="{{ t "entry.starred.toast.off" }}"
+                    data-value="{{ if .entry.Starred }}star{{ else }}unstar{{ end }}"
+                    >{{ if .entry.Starred }}{{ icon "unstar" }}{{ else }}{{ icon "star" }}{{ end }}<span class="icon-label">{{ if .entry.Starred }}{{ t "entry.starred.toggle.off" }}{{ else }}{{ t "entry.starred.toggle.on" }}{{ end }}</span></button>
+            </li>
+            {{ if .hasSaveEntry }}
+            <li>
+                <button
+                    class="page-button"
+                    title="{{ t "entry.save.title" }}"
+                    data-save-entry="true"
+                    data-save-url="{{ route "saveEntry" "entryID" .entry.ID }}"
+                    data-label-loading="{{ t "entry.state.saving" }}"
+                    data-label-done="{{ t "entry.save.completed" }}"
+                    data-toast-done="{{ t "entry.save.toast.completed" }}"
+                    >{{ icon "save" }}<span class="icon-label">{{ t "entry.save.label" }}</span></button>
+            </li>
+            {{ end }}
+            {{ if .entry.ShareCode }}
+            <li>
+                <a href="{{ route "sharedEntry" "shareCode" .entry.ShareCode }}"
+                    title="{{ t "entry.shared_entry.title" }}"
+                    data-share-status="shared"
+                    {{ if $.user.OpenExternalLinksInNewTab }}target="_blank"{{ end }}>{{ icon "share" }}<span class="icon-label">{{ t "entry.shared_entry.label" }}</span></a>
+            </li>
+            <li>
+                <button
+                    class="page-button"
+                    data-confirm="true"
+                    data-url="{{ route "unshareEntry" "entryID" .entry.ID }}"
+                    data-label-question="{{ t "confirm.question" }}"
+                    data-label-yes="{{ t "confirm.yes" }}"
+                    data-label-no="{{ t "confirm.no" }}"
+                    data-label-loading="{{ t "confirm.loading" }}">{{ icon "delete" }}<span class="icon-label">{{ t "entry.unshare.label" }}</span></button>
+            </li>
+            {{ else }}
+            <li>
+                <form method="post" action="{{route "shareEntry" "entryID" .entry.ID }}">
+                    <input type="hidden" name="csrf" value="{{ .csrf }}">
+                    <button type="submit" class="page-button">
+                        {{ icon "share" }}<span class="icon-label">{{ t "entry.share.label" }}</span>
+                    </button>
+                </form>
+            </li>
+            {{ end }}
+        </ul>
+    </nav>
+</section>
+{{ end }}
+
+{{ define "content"}}
+<form action="{{ route "updateEntry" "entryID" .entry.ID }}" method="post" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{ .csrf }}">
+
+    {{ if .errorMessage }}
+        <div role="alert" class="alert alert-error">{{ .errorMessage }}</div>
+    {{ end }}
+
+    <label for="form-url">{{ t "form.entry.label.url" }}</label>
+    <input type="url" name="url" id="form-url" placeholder="https://domain.tld/" value="{{ .form.URL }}" spellcheck="false" required autofocus>
+
+    <label for="form-title">{{ t "form.entry.label.title" }}</label>
+    <input type="text" name="title" id="form-title" placeholder="{{ t "form.entry.placeholder.title" }}" value="{{ .form.Title }}">
+
+    <label for="form-tags">{{ t "form.entry.label.tags" }}</label>
+    <input type="text" name="tags" id="form-tags" placeholder="{{ t "form.entry.placeholder.tags" }}" value="{{ .form.Tags | joinStrings }}">
+
+    <label for="form-author">{{ t "form.entry.label.author" }}</label>
+    <input type="text" name="author" id="form-author" placeholder="{{ t "form.entry.placeholder.author" }}" value="{{ .form.Author }}">
+
+    <label for="form-date">{{ t "form.entry.label.date" }}</label>
+    <input type="date" name="date" id="form-date" placeholder="{{ t "form.entry.placeholder.date" }}" value="{{ .form.Date }}">
+
+    <div class="buttons">
+        <button type="submit" class="button button-primary" data-label-loading="{{ t "form.submit.saving" }}">{{ t "action.update" }}</button>
+    </div>
+</form>
+
+<div role="alert" class="alert alert-error">
+    <a href="#"
+        data-confirm="true"
+        data-action="remove-entry"
+        data-label-question="{{ t "confirm.question" }}"
+        data-label-yes="{{ t "confirm.yes" }}"
+        data-label-no="{{ t "confirm.no" }}"
+        data-label-loading="{{ t "confirm.loading" }}"
+        data-url="{{ route "removeEntry" "entryID" .entry.ID }}"
+        data-redirect-url="{{ route "feedEntries" "feedID" .entry.Feed.ID }}">{{ t "action.remove_entry" }}</a>
+</div>
+{{ end }}

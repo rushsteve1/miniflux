@@ -78,6 +78,7 @@ func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	sr.HandleFunc("/entries", handler.setEntryStatus).Methods(http.MethodPut)
 	sr.HandleFunc("/entries/{entryID}", handler.getEntry).Methods(http.MethodGet)
 	sr.HandleFunc("/entries/{entryID}", handler.updateEntry).Methods(http.MethodPut)
+	sr.HandleFunc("/entries/{entryID}", handler.removeEntry).Methods(http.MethodDelete)
 	sr.HandleFunc("/entries/{entryID}/bookmark", handler.toggleStarred).Methods(http.MethodPut)
 	sr.HandleFunc("/entries/{entryID}/star", handler.toggleStarred).Methods(http.MethodPut)
 	sr.HandleFunc("/entries/{entryID}/save", handler.saveEntry).Methods(http.MethodPost)

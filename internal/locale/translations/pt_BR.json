@@ -7,6 +7,7 @@
     "action.login": "Iniciar sessão",
     "action.or": "Ou",
     "action.remove": "Remover",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Remover fonte",
     "action.save": "Salvar",
     "action.subscribe": "Inscrever",
@@ -49,6 +50,9 @@
     "enclosure_media_controls.speed.slower.title": "Mais lento em %sx",
     "entry.comments.label": "Comentários",
     "entry.comments.title": "Ver comentários",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "Leitura de %d minuto",
         "Leitura de %d minutos"
@@ -478,6 +482,7 @@
     ],
     "page.category_label": "Categoria: %s",
     "page.edit_category.title": "Editar categoria: %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "Cabeçalho 'ETag':",
     "page.edit_feed.last_check": "Última verificação:",
     "page.edit_feed.last_modified_header": "Cabeçalho 'LastModified':",

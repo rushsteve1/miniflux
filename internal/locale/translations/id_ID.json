@@ -7,6 +7,7 @@
     "action.login": "Masuk",
     "action.or": "atau",
     "action.remove": "Hapus",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Hapus umpan ini",
     "action.save": "Simpan",
     "action.subscribe": "Langgan",
@@ -48,6 +49,9 @@
     "enclosure_media_controls.speed.slower.title": "Lebih lambat %sx",
     "entry.comments.label": "Komentar",
     "entry.comments.title": "Lihat Komentar",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "%d menit untuk dibaca"
     ],
@@ -473,6 +477,7 @@
     ],
     "page.category_label": "Category: %s",
     "page.edit_category.title": "Sunting Kategori: %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "Tajuk ETag:",
     "page.edit_feed.last_check": "Terakhir diperiksa:",
     "page.edit_feed.last_modified_header": "Tajuk LastModified:",

@@ -7,6 +7,7 @@
     "action.login": "लॉग इन करें",
     "action.or": "या",
     "action.remove": "हटाएँ",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "इस फ़ीड को हटाएँ",
     "action.save": "सहेजें",
     "action.subscribe": "सदस्यता लें",
@@ -49,6 +50,9 @@
     "enclosure_media_controls.speed.slower.title": "%sx गुना धीमा",
     "entry.comments.label": "टिप्पणियाँ",
     "entry.comments.title": "टिप्पणियाँ देखे",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "पढ़ने मे %d मिनट मागेगा",
         "पढ़ने मे %d मिनट मागेगा"
@@ -478,6 +482,7 @@
     ],
     "page.category_label": "Category: %s",
     "page.edit_category.title": "%s श्रेणी संपाद करे",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "ईटाग हैडर:",
     "page.edit_feed.last_check": "अंतिम जांच:",
     "page.edit_feed.last_modified_header": "अंतिम बार संशोधित हैडर:",

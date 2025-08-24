@@ -7,6 +7,7 @@
     "action.login": "Inloggen",
     "action.or": "of",
     "action.remove": "Verwijderen",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Verwijder deze feed",
     "action.save": "Opslaan",
     "action.subscribe": "Abonneren",
@@ -49,6 +50,9 @@
     "enclosure_media_controls.speed.slower.title": "Vertraag met %sx",
     "entry.comments.label": "Reacties",
     "entry.comments.title": "Bekijk reacties",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "%d minuut leestijd",
         "%d minuten leestijd"
@@ -478,6 +482,7 @@
     ],
     "page.category_label": "Categorie: %s",
     "page.edit_category.title": "Bewerk categorie: %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "ETAG header:",
     "page.edit_feed.last_check": "Laatste controle:",
     "page.edit_feed.last_modified_header": "LastModified header:",

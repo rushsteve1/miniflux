@@ -7,6 +7,7 @@
     "action.login": "Σύνδεση",
     "action.or": "ή",
     "action.remove": "Κατάργηση",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Κατάργηση αυτής της ροής",
     "action.save": "Αποθηκεύσετε",
     "action.subscribe": "Εγγραφείτε",
@@ -49,6 +50,9 @@
     "enclosure_media_controls.speed.slower.title": "Πιο αργά κατά %sx",
     "entry.comments.label": "Σχόλια",
     "entry.comments.title": "Δείτε Σχόλια",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "%d λεπτό ανάγνωση",
         "%d λεπτά ανάγνωση"
@@ -478,6 +482,7 @@
     ],
     "page.category_label": "Κατηγορία: %s",
     "page.edit_category.title": "Επεξεργασία κατηγορίας: % s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "Κεφαλίδα ETag:",
     "page.edit_feed.last_check": "Τελευταίος έλεγχος:",
     "page.edit_feed.last_modified_header": "LastModified κεφαλίδα:",

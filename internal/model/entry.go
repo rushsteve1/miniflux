@@ -78,17 +78,47 @@ type EntriesStatusUpdateRequest struct {
 
 // EntryUpdateRequest represents a request to update an entry.
 type EntryUpdateRequest struct {
-	Title   *string `json:"title"`
-	Content *string `json:"content"`
+	URL           *string  `json:"url"`
+	Title         *string  `json:"title"`
+	Author        *string  `json:"author"`
+	Date          *time.Time  `json:"date"`
+	Content       *string  `json:"content"`
+	ReadingTime   *int     `json:"reading_time"`
+	Tags          []string `json:"tags"`
+	ScrollPercent *float32 `json:"scroll_percent"`
 }
 
 func (e *EntryUpdateRequest) Patch(entry *Entry) {
+	if e.URL != nil && *e.URL != "" {
+		entry.URL = *e.URL
+	}
+
 	if e.Title != nil && *e.Title != "" {
 		entry.Title = *e.Title
 	}
 
+	if e.Author != nil && *e.Author != "" {
+		entry.Author = *e.Author
+	}
+
+	if e.Date != nil && !e.Date.IsZero() {
+		entry.Date = *e.Date
+	}
+
 	if e.Content != nil && *e.Content != "" {
 		entry.Content = *e.Content
+	}
+
+	if e.ReadingTime != nil && *e.ReadingTime != 0 {
+		entry.ReadingTime = *e.ReadingTime
+	}
+
+	if e.Tags != nil {
+		entry.Tags = CleanTags(e.Tags)
+	}
+
+	if e.ScrollPercent != nil && *e.ScrollPercent != 0.0 {
+		entry.ScrollPercent = *e.ScrollPercent
 	}
 }
 

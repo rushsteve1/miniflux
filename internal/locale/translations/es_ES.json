@@ -7,6 +7,7 @@
     "action.login": "Iniciar sesión",
     "action.or": "o",
     "action.remove": "Eliminar",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Eliminar esta fuente",
     "action.save": "Guardar",
     "action.subscribe": "Suscribir",
@@ -49,6 +50,9 @@
     "enclosure_media_controls.speed.slower.title": "Más despacio a %sx",
     "entry.comments.label": "Comentarios",
     "entry.comments.title": "Ver comentarios",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "%d minuto de lectura",
         "%d minutos de lectura"
@@ -478,6 +482,7 @@
     ],
     "page.category_label": "Categoría: %s",
     "page.edit_category.title": "Editar categoría: %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "Cabecera de ETag:",
     "page.edit_feed.last_check": "Última verificación:",
     "page.edit_feed.last_modified_header": "Cabecera de LastModified:",

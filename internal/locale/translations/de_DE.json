@@ -7,6 +7,7 @@
     "action.login": "Anmelden",
     "action.or": "oder",
     "action.remove": "Entfernen",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "Dieses Abonnement entfernen",
     "action.save": "Speichern",
     "action.subscribe": "Abonnieren",
@@ -49,6 +50,9 @@
     "enclosure_media_controls.speed.slower.title": "%sx langsamer",
     "entry.comments.label": "Kommentare",
     "entry.comments.title": "Kommentare anzeigen",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "%d Minute zu lesen",
         "%d Minuten zu lesen"
@@ -478,6 +482,7 @@
     ],
     "page.category_label": "Kategorie: %s",
     "page.edit_category.title": "Kategorie bearbeiten: %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "ETag-Kopfzeile:",
     "page.edit_feed.last_check": "Letzte Aktualisierung:",
     "page.edit_feed.last_modified_header": "Zuletzt geändert:",

@@ -7,6 +7,7 @@
     "action.login": "登入",
     "action.or": "或",
     "action.remove": "刪除",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "刪除此 Feed",
     "action.save": "儲存",
     "action.subscribe": "訂閱",
@@ -48,6 +49,9 @@
     "enclosure_media_controls.speed.slower.title": "放慢 %sx",
     "entry.comments.label": "評論",
     "entry.comments.title": "檢視評論",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "需要 %d 分鐘閱讀"
     ],
@@ -473,6 +477,7 @@
     ],
     "page.category_label": "分類：%s",
     "page.edit_category.title": "編輯分類 : %s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "ETag 標頭：",
     "page.edit_feed.last_check": "最後檢查時間：",
     "page.edit_feed.last_modified_header": "最後修改的 Header：",

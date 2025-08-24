@@ -7,6 +7,7 @@
     "action.login": "登录",
     "action.or": "或",
     "action.remove": "移除",
+    "action.remove_entry": "Remove this entry",
     "action.remove_feed": "移除此订阅源",
     "action.save": "保存",
     "action.subscribe": "订阅",
@@ -48,6 +49,9 @@
     "enclosure_media_controls.speed.slower.title": "速度减慢到 %sx",
     "entry.comments.label": "评论",
     "entry.comments.title": "查看评论",
+    "entry.completed": "completed",
+    "entry.edit.label": "Edit",
+    "entry.edit.title": "Edit this entry",
     "entry.estimated_reading_time": [
         "需要 %d 分钟阅读"
     ],
@@ -473,6 +477,7 @@
     ],
     "page.category_label": "分类: %s",
     "page.edit_category.title": "编辑分类：%s",
+    "page.edit_entry.title": "Edit Entry: %s",
     "page.edit_feed.etag_header": "ETag 标题：",
     "page.edit_feed.last_check": "最后检查时间：",
     "page.edit_feed.last_modified_header": "最后修改的 Header：",

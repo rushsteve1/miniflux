@@ -127,6 +127,12 @@
                         data-label-loading="{{ t "entry.state.loading" }}"
                         >{{ icon "scraper" }}<span class="icon-label">{{ t "entry.scraper.label" }}</span></button>
                 </li>
+                <li>
+                    <a
+                        title="{{ t "entry.edit.title" }}"
+                        href="{{ route "editEntry" "entryID" .entry.ID }}"
+                        >{{ icon "edit" }}<span class="icon-label">{{ t "entry.edit.label" }}</span></a>
+                </li>
                 {{ if .entry.CommentsURL }}
                 <li>
                     <a href="{{ .entry.CommentsURL | safeURL }}"

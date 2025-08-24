@@ -149,17 +149,8 @@ func (j *JSONAdapter) BuildFeed(baseURL string) *model.Feed {
 			}
 		}
 
-		// Populate the entry tags.
-		for _, tag := range item.Tags {
-			tag = strings.TrimSpace(tag)
-			if tag != "" {
-				entry.Tags = append(entry.Tags, tag)
-			}
-		}
-
-		// Sort and deduplicate tags.
-		slices.Sort(entry.Tags)
-		entry.Tags = slices.Compact(entry.Tags)
+		// Clean and populate the entry tags.
+		entry.Tags = model.CleanTags(item.Tags)
 
 		// Generate a hash for the entry.
 		for _, value := range []string{item.ID, item.URL, item.ContentText + item.ContentHTML + item.Summary} {

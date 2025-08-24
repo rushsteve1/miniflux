@@ -4,6 +4,8 @@
 package model // import "miniflux.app/v2/internal/model"
 
 import (
+	"slices"
+	"strings"
 	"time"
 )
 
@@ -88,4 +90,16 @@ func (e *EntryUpdateRequest) Patch(entry *Entry) {
 	if e.Content != nil && *e.Content != "" {
 		entry.Content = *e.Content
 	}
+}
+
+func CleanTags(tags []string) []string {
+	cleanedTags := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		cleanedTag := strings.ToLower(strings.TrimSpace(tag))
+		if cleanedTag != "" {
+			cleanedTags = append(cleanedTags, cleanedTag)
+		}
+	}
+	slices.Sort(cleanedTags)
+	return slices.Compact(cleanedTags)
 }

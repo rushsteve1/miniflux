@@ -79,6 +79,9 @@ func (b *BatchBuilder) FetchJobs() (model.JobList, error) {
 		query += " WHERE " + strings.Join(b.conditions, " AND ")
 	}
 
+	// Always skip manual feeds
+	query += " WHERE manual IS false"
+
 	query += " ORDER BY next_check_at ASC"
 
 	if b.batchSize > 0 {

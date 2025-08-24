@@ -62,6 +62,7 @@ type Feed struct {
 	NtfyTopic                   string    `json:"ntfy_topic"`
 	PushoverPriority            int       `json:"pushover_priority"`
 	ProxyURL                    string    `json:"proxy_url"`
+	Manual                      bool      `json:"manual"`
 
 	// Non-persisted attributes
 	Category *Category `json:"category,omitempty"`

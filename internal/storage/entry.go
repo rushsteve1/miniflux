@@ -16,6 +16,14 @@ import (
 	"github.com/lib/pq"
 )
 
+// EntryExists checks if the given entry exists.
+func (s *Storage) EntryExists(userID, entryID int64) bool {
+	var result bool
+	query := `SELECT true FROM entries WHERE user_id=$1 AND id=$2 LIMIT 1`
+	s.db.QueryRow(query, userID, entryID).Scan(&result)
+	return result
+}
+
 // CountAllEntries returns the number of entries for each status in the database.
 func (s *Storage) CountAllEntries() map[string]int64 {
 	rows, err := s.db.Query(`SELECT status, count(*) FROM entries GROUP BY status`)
@@ -77,12 +85,13 @@ func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
 			title=$1,
 			content=$2,
 			reading_time=$3,
-			document_vectors = setweight(to_tsvector($4), 'A') || setweight(to_tsvector($5), 'B')
+			document_vectors = setweight(to_tsvector($4), 'A') || setweight(to_tsvector($5), 'B'),
+			scroll_percent = 0
 		WHERE
 			id=$6 AND user_id=$7
 	`
 
-	if _, err := s.db.Exec(
+	_, err := s.db.Exec(
 		query,
 		entry.Title,
 		entry.Content,
@@ -90,11 +99,27 @@ func (s *Storage) UpdateEntryTitleAndContent(entry *model.Entry) error {
 		truncatedTitle,
 		truncatedContent,
 		entry.ID,
-		entry.UserID); err != nil {
+		entry.UserID,
+	)
+	if err != nil {
 		return fmt.Errorf(`store: unable to update entry #%d: %v`, entry.ID, err)
 	}
 
 	return nil
+}
+
+func (s *Storage) CreateEntry(entry *model.Entry) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if err := s.createEntry(tx, entry); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // createEntry add a new entry.
@@ -171,6 +196,20 @@ func (s *Storage) createEntry(tx *sql.Tx, entry *model.Entry) error {
 	}
 
 	return nil
+}
+
+func (s *Storage) UpdateEntry(entry *model.Entry) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if err := s.updateEntry(tx, entry); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // updateEntry updates an entry when a feed is refreshed.
@@ -442,6 +481,7 @@ func (s *Storage) SetEntriesStatus(userID int64, entryIDs []int64, status string
 			entries
 		SET
 			status=$1,
+			scroll_percent=0,
 			changed_at=now()
 		WHERE
 			user_id=$2 AND
@@ -705,6 +745,34 @@ func (s *Storage) UnshareEntry(userID int64, entryID int64) (err error) {
 		err = fmt.Errorf(`store: unable to remove share code for entry #%d: %v`, entryID, err)
 	}
 	return
+}
+
+// SCROLL_THRESHOLD for marking an entry as read.
+const SCROLL_THRESHOLD float32 = 0.95
+
+// UpdateEntryScrollPercent updates the scroll percent and status for the given entry.
+func (s *Storage) UpdateEntryScrollPercent(entryID int64, scrollPercent float32) (err error) {
+	status := ""
+	if scrollPercent > SCROLL_THRESHOLD {
+		status += fmt.Sprintf(", status = '%s'", model.EntryStatusRead)
+	}
+
+	// Only update if the scroll percent has increased
+	query := `UPDATE entries SET scroll_percent = $1 %s WHERE id=$2;`
+	_, err = s.db.Exec(fmt.Sprintf(query, status), scrollPercent, entryID)
+	if err != nil {
+		err = fmt.Errorf(`store: unable to update scroll percent for entry #%d: %v`, entryID, err)
+	}
+	return
+}
+
+func (s *Storage) RemoveEntry(entryID int64) error {
+	query := `DELETE FROM entries WHERE id=$1`
+	_, err := s.db.Exec(query, entryID)
+	if err != nil {
+		err = fmt.Errorf(`store: unable to remove entry #%d: %v`, entryID, err)
+	}
+	return err
 }
 
 func truncateTitleAndContentForTSVectorField(title, content string) (string, string) {

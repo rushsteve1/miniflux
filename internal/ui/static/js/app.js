@@ -378,6 +378,15 @@ function goToAddSubscriptionPage() {
 }
 
 /**
+ * Navigate to the add entry page.
+ *
+ * @returns {void}
+ */
+function goToAddEntryPage() {
+    window.location.href = document.body.dataset.addEntryUrl;
+}
+
+/**
  * Navigate to the next or previous item in the list.
  *
  * If the offset is TOP, it will jump to the first item in the list.
@@ -1206,6 +1215,7 @@ function initializeKeyboardShortcuts() {
     keyboardHandler.on("s", () => handleSaveEntryAction());
     keyboardHandler.on("d", handleFetchOriginalContentAction);
     keyboardHandler.on("f", () => handleStarAction());
+    keyboardHandler.on("N", () => goToAddEntryPage());
 
     // Feed actions
     keyboardHandler.on("F", goToFeedPage);
@@ -1274,6 +1284,53 @@ function initializeClickHandlers() {
     }, true);
 }
 
+/**
+ * Initialize the scroll handler for the entry view.
+ */
+function initializeScrollHandler() {
+    if (!isEntryView()) {
+        return;
+    }
+    const content = document.querySelector("article.entry-content");
+    const rect = content.getBoundingClientRect();
+
+    let farthestScroll = parseFloat(content.dataset.scrollPercent) || 0.0;
+    if (farthestScroll > 0) {
+        window.scrollTo({
+            left: 0,
+            top: rect.top + (rect.height * farthestScroll),
+            behavior: 'smooth'
+        });
+    }
+
+    // Run the event inside a timeout debounce
+    const timeout = 500;
+    let timer = 0;
+    document.addEventListener("scroll", () => {
+        clearTimeout(timer);
+        timer = setTimeout(async () => {
+            if (window.scrollY < rect.top) {
+              return;
+            }
+
+            let scrollPercent = (window.scrollY - rect.top) / (rect.height - window.innerHeight);
+            scrollPercent = Math.min(Math.max(scrollPercent, 0), 1);
+
+            if (scrollPercent > farthestScroll) {
+              farthestScroll = scrollPercent;
+
+              const fd = new FormData();
+              fd.set("percent", scrollPercent);
+
+              await fetch(content.dataset.scrollUrl, {
+                method: 'PUT',
+                body: fd,
+              });
+            }
+        }, timeout);
+    });
+}
+
 // Initialize application handlers
 initializeMainMenuHandlers();
 initializeFormHandlers();
@@ -1283,6 +1340,7 @@ initializeKeyboardShortcuts();
 initializeTouchHandler();
 initializeClickHandlers();
 initializeServiceWorker();
+initializeScrollHandler();
 
 // Reload the page if it was restored from the back-forward cache and mark entries as read is enabled.
 window.addEventListener("pageshow", (event) => {

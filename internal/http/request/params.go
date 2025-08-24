@@ -22,6 +22,17 @@ func FormInt64Value(r *http.Request, param string) int64 {
 	return integer
 }
 
+// FormFloat32Value returns a form value as float32.
+func FormFloat32Value(r *http.Request, param string) float32 {
+	value := r.FormValue(param)
+	float, err := strconv.ParseFloat(value, 32)
+	if err != nil {
+		return 0
+	}
+
+	return float32(float)
+}
+
 // RouteInt64Param returns an URL route parameter as int64.
 func RouteInt64Param(r *http.Request, param string) int64 {
 	vars := mux.Vars(r)

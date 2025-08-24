@@ -38,6 +38,7 @@ func (e *Engine) ParseTemplates() {
 	funcMap := e.funcMap.Map()
 	templates := map[string][]string{ // this isn't a global variable so that it can be garbage-collected.
 		"about.html":               {"layout.html", "settings_menu.html"},
+		"add_entry.html":           {"layout.html", "settings_menu.html"},
 		"add_subscription.html":    {"feed_menu.html", "layout.html", "settings_menu.html"},
 		"api_keys.html":            {"layout.html", "settings_menu.html"},
 		"starred_entries.html":     {"item_meta.html", "layout.html", "pagination.html"},
@@ -49,6 +50,7 @@ func (e *Engine) ParseTemplates() {
 		"create_category.html":     {"layout.html"},
 		"create_user.html":         {"layout.html", "settings_menu.html"},
 		"edit_category.html":       {"layout.html", "settings_menu.html"},
+		"edit_entry.html":          {"layout.html", "settings_menu.html"},
 		"edit_feed.html":           {"layout.html"},
 		"edit_user.html":           {"layout.html", "settings_menu.html"},
 		"entry.html":               {"layout.html"},

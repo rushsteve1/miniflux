@@ -139,8 +139,7 @@ func (a *atom10Adapter) populateEntries(siteURL string) model.Entries {
 		}
 
 		// Sort and deduplicate categories.
-		sort.Strings(categories)
-		entry.Tags = slices.Compact(categories)
+		entry.Tags = model.CleanTags(categories)
 
 		// Populate the commentsURL if defined.
 		// See https://tools.ietf.org/html/rfc4685#section-4

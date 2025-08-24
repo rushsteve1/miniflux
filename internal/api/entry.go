@@ -279,12 +279,29 @@ func (h *handler) updateEntry(w http.ResponseWriter, r *http.Request) {
 		entry.ReadingTime = readingtime.EstimateReadingTime(entry.Content, user.DefaultReadingSpeed, user.CJKReadingSpeed)
 	}
 
-	if err := h.store.UpdateEntryTitleAndContent(entry); err != nil {
+	if err := h.store.UpdateEntry(entry); err != nil {
 		json.ServerError(w, r, err)
 		return
 	}
 
 	json.Created(w, r, entry)
+}
+
+func (h *handler) removeEntry(w http.ResponseWriter, r *http.Request) {
+	loggedUserID := request.UserID(r)
+	entryID := request.RouteInt64Param(r, "entryID")
+
+	if !h.store.EntryExists(loggedUserID, entryID) {
+		json.NotFound(w, r)
+		return
+	}
+
+	if err := h.store.RemoveEntry(entryID); err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+
+	json.NoContent(w, r)
 }
 
 func (h *handler) fetchContent(w http.ResponseWriter, r *http.Request) {

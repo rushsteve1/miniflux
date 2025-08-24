@@ -105,6 +105,13 @@ func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	uiRouter.HandleFunc("/entry/download/{entryID}", handler.fetchContent).Name("fetchContent").Methods(http.MethodPost)
 	uiRouter.HandleFunc("/proxy/{encodedDigest}/{encodedURL}", handler.mediaProxy).Name("proxy").Methods(http.MethodGet)
 	uiRouter.HandleFunc("/entry/star/{entryID}", handler.toggleStarred).Name("toggleStarred").Methods(http.MethodPost)
+	uiRouter.HandleFunc("/entry/star/{entryID}", handler.toggleStarred).Name("toggleBookmark").Methods(http.MethodPost)
+	uiRouter.HandleFunc("/entry/scroll/{entryID}", handler.scrollEntry).Name("scrollEntry").Methods(http.MethodPut)
+	uiRouter.HandleFunc("/entry/create", handler.showAddEntryPage).Name("addEntry").Methods(http.MethodGet)
+	uiRouter.HandleFunc("/entry/create", handler.submitEntry).Name("submitEntry").Methods(http.MethodPost)
+	uiRouter.HandleFunc("/entry/{entryID}/edit", handler.showEditEntryPage).Name("editEntry").Methods(http.MethodGet)
+	uiRouter.HandleFunc("/entry/{entryID}/update", handler.updateEntry).Name("updateEntry").Methods(http.MethodPost)
+	uiRouter.HandleFunc("/entry/{entryID}/remove", handler.removeEntry).Name("removeEntry").Methods(http.MethodPost)
 
 	// Share pages.
 	uiRouter.HandleFunc("/entry/share/{entryID}", handler.createSharedEntry).Name("shareEntry").Methods(http.MethodPost)

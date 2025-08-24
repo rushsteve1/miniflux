@@ -40,13 +40,9 @@ func ValidateEntryOrder(order string) error {
 
 // ValidateEntryModification makes sure the entry modification is valid.
 func ValidateEntryModification(request *model.EntryUpdateRequest) error {
-	if request.Title != nil && *request.Title == "" {
-		return fmt.Errorf(`the entry title cannot be empty`)
-	}
-
-	if request.Content != nil && *request.Content == "" {
-		return fmt.Errorf(`the entry content cannot be empty`)
-	}
+	// Due to changes in the way model.EntryRequest.Patch is handled there
+	// is currently no validation done here.
+	// This function is kept for future use.
 
 	return nil
 }

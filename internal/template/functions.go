@@ -105,6 +105,9 @@ func (f *funcMap) Map() template.FuncMap {
 		"percent": func(n float32) string {
 			return fmt.Sprintf("%d", int(n*100))
 		},
+		"joinStrings": func(tags []string) string {
+			return strings.Join(tags, ", ")
+		},
 
 		// These functions are overridden at runtime after parsing.
 		"elapsed": func(timezone string, t time.Time) string {

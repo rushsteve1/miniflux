@@ -7,7 +7,6 @@ import (
 	"html"
 	"log/slog"
 	"path"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -127,13 +126,12 @@ func (r *rssAdapter) buildFeed(baseURL string) *model.Feed {
 		}
 
 		// Populate entry categories.
-		entry.Tags = findEntryTags(&item)
-		if len(entry.Tags) == 0 {
-			entry.Tags = findFeedTags(&r.rss.Channel)
+		tags := findEntryTags(&item)
+		if len(tags) == 0 {
+			tags = findFeedTags(&r.rss.Channel)
 		}
 		// Sort and deduplicate tags.
-		slices.Sort(entry.Tags)
-		entry.Tags = slices.Compact(entry.Tags)
+		entry.Tags = model.CleanTags(tags)
 
 		feed.Entries = append(feed.Entries, entry)
 	}

@@ -23,6 +23,7 @@
                     <span class="sr-only">{{ plural "page.total_entry_count" .NumberOfVisibleEntries .NumberOfVisibleEntries }}</span>
                     <span aria-hidden="true">{{ .NumberOfVisibleEntries }} )</span>
                 </span>
+                {{ if .Category }}
                 <span class="category">
                     <a id="feed-category-{{ .ID }}"
                        href="{{ route "categoryEntries" "categoryID" .Category.ID }}"
@@ -31,6 +32,7 @@
                         {{ .Category.Title }}
                     </a>
                 </span>
+                {{ end }}
             </header>
             <div class="item-meta">
                 {{ if not .Manual }}

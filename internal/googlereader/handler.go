@@ -472,7 +472,7 @@ func getFeed(stream Stream, store *storage.Storage, userID int64) (*model.Feed, 
 func getOrCreateCategory(streamCategory Stream, store *storage.Storage, userID int64) (*model.Category, error) {
 	switch {
 	case streamCategory.ID == "":
-		return store.FirstCategory(userID)
+		return nil, nil
 	case store.CategoryTitleExists(userID, streamCategory.ID):
 		return store.CategoryByTitle(userID, streamCategory.ID)
 	default:
@@ -483,15 +483,19 @@ func getOrCreateCategory(streamCategory Stream, store *storage.Storage, userID i
 }
 
 func subscribe(newFeed Stream, category Stream, title string, store *storage.Storage, userID int64) (*model.Feed, error) {
+	feedRequest := model.FeedCreationRequest{
+		FeedURL: newFeed.ID,
+	}
+
 	destCategory, err := getOrCreateCategory(category, store, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	feedRequest := model.FeedCreationRequest{
-		FeedURL:    newFeed.ID,
-		CategoryID: destCategory.ID,
+	if destCategory != nil {
+		feedRequest.CategoryID = destCategory.ID
 	}
+
 	verr := validator.ValidateFeedCreation(store, userID, &feedRequest)
 	if verr != nil {
 		return nil, verr.Error()
@@ -570,17 +574,18 @@ func move(feedStream Stream, labelStream Stream, store *storage.Storage, userID 
 		return errFeedNotFound
 	}
 
+	// Move to uncategorized by default or the new feed
+	feedModification := model.FeedModificationRequest{}
+
 	category, err := getOrCreateCategory(labelStream, store, userID)
 	if err != nil {
 		return err
 	}
-	if category == nil {
-		return errCategoryNotFound
+
+	if category != nil {
+		feedModification.CategoryID = &category.ID
 	}
 
-	feedModification := model.FeedModificationRequest{
-		CategoryID: &category.ID,
-	}
 	feedModification.Patch(feed)
 	return store.UpdateFeed(feed)
 }
@@ -750,7 +755,7 @@ func (h *handler) streamItemContentsHandler(w http.ResponseWriter, r *http.Reque
 		}
 		categories := make([]string, 0)
 		categories = append(categories, userReadingList)
-		if entry.Feed.Category.Title != "" {
+		if entry.Feed.Category != nil && entry.Feed.Category.Title != "" {
 			categories = append(categories, fmt.Sprintf(userLabelPrefix, userID)+entry.Feed.Category.Title)
 		}
 		if entry.Status == model.EntryStatusRead {

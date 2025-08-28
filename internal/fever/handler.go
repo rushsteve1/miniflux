@@ -570,7 +570,11 @@ A feeds_group object has the following members:
 func (h *handler) buildFeedGroups(feeds model.Feeds) []feedsGroups {
 	feedsGroupedByCategory := make(map[int64][]string)
 	for _, feed := range feeds {
-		feedsGroupedByCategory[feed.Category.ID] = append(feedsGroupedByCategory[feed.Category.ID], strconv.FormatInt(feed.ID, 10))
+		if feed.Category != nil {
+			feedsGroupedByCategory[feed.Category.ID] = append(feedsGroupedByCategory[feed.Category.ID], strconv.FormatInt(feed.ID, 10))
+		} else {
+			feedsGroupedByCategory[0] = append(feedsGroupedByCategory[0], strconv.FormatInt(feed.ID, 10))
+		}
 	}
 
 	result := make([]feedsGroups, 0)

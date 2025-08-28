@@ -58,8 +58,13 @@ func IsValidDomain(domain string) bool {
 }
 
 func IsValidDomainList(value string) bool {
-	domains := strings.Split(strings.TrimSpace(value), " ")
-	for _, domain := range domains {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return true
+	}
+
+	domains := strings.SplitSeq(value, " ")
+	for domain := range domains {
 		if !IsValidDomain(domain) {
 			return false
 		}

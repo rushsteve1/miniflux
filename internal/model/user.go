@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"miniflux.app/v2/internal/timezone"
+	"miniflux.app/v2/internal/version"
 )
 
 const (
@@ -100,11 +101,11 @@ type UserModificationRequest struct {
 
 // Patch updates the User object with the modification request.
 func (u *UserModificationRequest) Patch(user *User) {
-	if u.Username != nil {
+	if u.Username != nil && *u.Username != "" {
 		user.Username = *u.Username
 	}
 
-	if u.Password != nil {
+	if u.Password != nil && *u.Password != "" {
 		user.Password = *u.Password
 	}
 
@@ -112,15 +113,15 @@ func (u *UserModificationRequest) Patch(user *User) {
 		user.IsAdmin = *u.IsAdmin
 	}
 
-	if u.Theme != nil {
+	if u.Theme != nil && *u.Theme != "" {
 		user.Theme = *u.Theme
 	}
 
-	if u.Language != nil {
+	if u.Language != nil && *u.Language != "" {
 		user.Language = *u.Language
 	}
 
-	if u.Timezone != nil {
+	if u.Timezone != nil && *u.Timezone != "" {
 		user.Timezone = *u.Timezone
 	}
 
@@ -176,11 +177,11 @@ func (u *UserModificationRequest) Patch(user *User) {
 		user.DisplayMode = *u.DisplayMode
 	}
 
-	if u.DefaultReadingSpeed != nil {
+	if u.DefaultReadingSpeed != nil && *u.DefaultReadingSpeed != 0 {
 		user.DefaultReadingSpeed = *u.DefaultReadingSpeed
 	}
 
-	if u.CJKReadingSpeed != nil {
+	if u.CJKReadingSpeed != nil && *u.CJKReadingSpeed != 0 {
 		user.CJKReadingSpeed = *u.CJKReadingSpeed
 	}
 
@@ -243,5 +244,47 @@ type Users []*User
 func (u Users) UseTimezone(tz string) {
 	for _, user := range u {
 		user.UseTimezone(tz)
+	}
+}
+
+type UserExport struct {
+	UserModificationRequest
+	Version string `json:"miniflux_version"`
+}
+
+func NewUserExport(u *User) UserExport {
+	return UserExport{
+		UserModificationRequest: UserModificationRequest{
+			Username:                        SetOptionalField(u.Username),
+			Theme:                           SetOptionalField(u.Theme),
+			Language:                        SetOptionalField(u.Language),
+			Timezone:                        SetOptionalField(u.Timezone),
+			EntryDirection:                  SetOptionalField(u.EntryDirection),
+			EntryOrder:                      SetOptionalField(u.EntryOrder),
+			Stylesheet:                      SetOptionalField(u.Stylesheet),
+			CustomJS:                        SetOptionalField(u.CustomJS),
+			ExternalFontHosts:               SetOptionalField(u.ExternalFontHosts),
+			GoogleID:                        SetOptionalField(u.GoogleID),
+			OpenIDConnectID:                 SetOptionalField(u.OpenIDConnectID),
+			EntriesPerPage:                  SetOptionalField(u.EntriesPerPage),
+			IsAdmin:                         SetOptionalField(u.IsAdmin),
+			KeyboardShortcuts:               SetOptionalField(u.KeyboardShortcuts),
+			ShowReadingTime:                 SetOptionalField(u.ShowReadingTime),
+			EntrySwipe:                      SetOptionalField(u.EntrySwipe),
+			GestureNav:                      SetOptionalField(u.GestureNav),
+			DisplayMode:                     SetOptionalField(u.DisplayMode),
+			DefaultReadingSpeed:             SetOptionalField(u.DefaultReadingSpeed),
+			CJKReadingSpeed:                 SetOptionalField(u.CJKReadingSpeed),
+			DefaultHomePage:                 SetOptionalField(u.DefaultHomePage),
+			CategoriesSortingOrder:          SetOptionalField(u.CategoriesSortingOrder),
+			MarkReadOnView:                  SetOptionalField(u.MarkReadOnView),
+			MarkReadOnMediaPlayerCompletion: SetOptionalField(u.MarkReadOnMediaPlayerCompletion),
+			MediaPlaybackRate:               SetOptionalField(u.MediaPlaybackRate),
+			BlockFilterEntryRules:           SetOptionalField(u.BlockFilterEntryRules),
+			KeepFilterEntryRules:            SetOptionalField(u.KeepFilterEntryRules),
+			AlwaysOpenExternalLinks:         SetOptionalField(u.AlwaysOpenExternalLinks),
+			OpenExternalLinksInNewTab:       SetOptionalField(u.OpenExternalLinksInNewTab),
+		},
+		Version: version.Version,
 	}
 }

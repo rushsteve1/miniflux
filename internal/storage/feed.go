@@ -278,12 +278,18 @@ func (s *Storage) CreateFeed(feed *model.Feed) error {
 		RETURNING
 			id
 	`
+
+	var categoryID *int64
+	if feed.Category != nil {
+		categoryID = &feed.Category.ID
+	}
+
 	err := s.db.QueryRow(
 		sql,
 		feed.FeedURL,
 		feed.SiteURL,
 		feed.Title,
-		feed.Category.ID,
+		categoryID,
 		feed.UserID,
 		feed.EtagHeader,
 		feed.LastModifiedHeader,
@@ -398,11 +404,17 @@ func (s *Storage) UpdateFeed(feed *model.Feed) (err error) {
 		WHERE
 			id=$40 AND user_id=$41
 	`
+
+	var categoryID *int64
+	if feed.Category != nil {
+		categoryID = &feed.Category.ID
+	}
+
 	_, err = s.db.Exec(query,
 		feed.FeedURL,
 		feed.SiteURL,
 		feed.Title,
-		feed.Category.ID,
+		categoryID,
 		feed.EtagHeader,
 		feed.LastModifiedHeader,
 		feed.CheckedAt,

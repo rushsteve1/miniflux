@@ -4,6 +4,7 @@
 package model // import "miniflux.app/v2/internal/model"
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"time"
@@ -88,7 +89,7 @@ func (f *Feed) String() string {
 		f.FeedURL,
 		f.SiteURL,
 		f.Title,
-		f.Category,
+		cmp.Or(f.Category, Uncategorized(f.UserID)),
 	)
 }
 
@@ -279,6 +280,8 @@ func (f *FeedModificationRequest) Patch(feed *Feed) {
 
 	if f.CategoryID != nil && *f.CategoryID > 0 {
 		feed.Category.ID = *f.CategoryID
+	} else {
+		feed.Category = nil
 	}
 
 	if f.Disabled != nil {

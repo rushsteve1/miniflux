@@ -51,7 +51,7 @@ func (u UserForm) ValidateModification() *locale.LocalizedError {
 }
 
 // Merge updates the fields of the given user.
-func (u UserForm) Merge(user *model.User) *model.User {
+func (u UserForm) Merge(user *model.User) {
 	user.Username = u.Username
 	user.IsAdmin = u.IsAdmin
 
@@ -59,7 +59,6 @@ func (u UserForm) Merge(user *model.User) *model.User {
 		user.Password = u.Password
 	}
 
-	return user
 }
 
 // NewUserForm returns a new UserForm.

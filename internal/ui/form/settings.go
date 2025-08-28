@@ -92,8 +92,8 @@ func extractMarkAsReadBehavior(behavior markReadBehavior) (markReadOnView, markR
 	}
 }
 
-// Merge updates the fields of the given user.
-func (s *SettingsForm) Merge(user *model.User) *model.User {
+// Patch updates the fields of the given user.
+func (s *SettingsForm) Patch(user *model.User) {
 	if !config.Opts.DisableLocalAuth() {
 		user.Username = s.Username
 	}
@@ -130,8 +130,6 @@ func (s *SettingsForm) Merge(user *model.User) *model.User {
 	if s.Password != "" {
 		user.Password = s.Password
 	}
-
-	return user
 }
 
 // Validate makes sure the form values are valid.

@@ -166,7 +166,7 @@
                 {{ end }}
             </span>
             {{ end }}
-            {{ if .user }}
+            {{ if and .user .entry.Feed.Category }}
             <span class="category">
                 <a href="{{ route "categoryEntries" "categoryID" .entry.Feed.Category.ID }}">{{ .entry.Feed.Category.Title }}</a>
             </span>

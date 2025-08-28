@@ -25,12 +25,15 @@ type handler struct {
 func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	handler := &handler{store, pool, router}
 
+	// Route setup
 	sr := router.PathPrefix("/v1").Subrouter()
 	middleware := newMiddleware(store)
 	sr.Use(middleware.handleCORS)
 	sr.Use(middleware.apiKeyAuth)
 	sr.Use(middleware.basicAuth)
 	sr.Methods(http.MethodOptions)
+
+	// User handlers.
 	sr.HandleFunc("/users", handler.createUser).Methods(http.MethodPost)
 	sr.HandleFunc("/users", handler.users).Methods(http.MethodGet)
 	sr.HandleFunc("/users/{userID:[0-9]+}", handler.userByID).Methods(http.MethodGet)
@@ -39,6 +42,8 @@ func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	sr.HandleFunc("/users/{userID:[0-9]+}/mark-all-as-read", handler.markUserAsRead).Methods(http.MethodPut)
 	sr.HandleFunc("/users/{username}", handler.userByUsername).Methods(http.MethodGet)
 	sr.HandleFunc("/me", handler.currentUser).Methods(http.MethodGet)
+
+	// Category handlers.
 	sr.HandleFunc("/categories", handler.createCategory).Methods(http.MethodPost)
 	sr.HandleFunc("/categories", handler.getCategories).Methods(http.MethodGet)
 	sr.HandleFunc("/categories/{categoryID}", handler.updateCategory).Methods(http.MethodPut)
@@ -49,6 +54,8 @@ func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	sr.HandleFunc("/categories/{categoryID}/entries", handler.getCategoryEntries).Methods(http.MethodGet)
 	sr.HandleFunc("/categories/{categoryID}/entries/{entryID}", handler.getCategoryEntry).Methods(http.MethodGet)
 	sr.HandleFunc("/discover", handler.discoverSubscriptions).Methods(http.MethodPost)
+
+	// Feed handlers.
 	sr.HandleFunc("/feeds", handler.createFeed).Methods(http.MethodPost)
 	sr.HandleFunc("/feeds", handler.getFeeds).Methods(http.MethodGet)
 	sr.HandleFunc("/feeds/counters", handler.fetchCounters).Methods(http.MethodGet)
@@ -59,10 +66,14 @@ func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	sr.HandleFunc("/feeds/{feedID}", handler.removeFeed).Methods(http.MethodDelete)
 	sr.HandleFunc("/feeds/{feedID}/icon", handler.getIconByFeedID).Methods(http.MethodGet)
 	sr.HandleFunc("/feeds/{feedID}/mark-all-as-read", handler.markFeedAsRead).Methods(http.MethodPut)
-	sr.HandleFunc("/export", handler.exportFeeds).Methods(http.MethodGet)
-	sr.HandleFunc("/import", handler.importFeeds).Methods(http.MethodPost)
 	sr.HandleFunc("/feeds/{feedID}/entries", handler.getFeedEntries).Methods(http.MethodGet)
 	sr.HandleFunc("/feeds/{feedID}/entries/{entryID}", handler.getFeedEntry).Methods(http.MethodGet)
+
+	// Feed import and export handlers.
+	sr.HandleFunc("/export", handler.exportFeeds).Methods(http.MethodGet)
+	sr.HandleFunc("/import", handler.importFeeds).Methods(http.MethodPost)
+
+	// Entry handlers.
 	sr.HandleFunc("/entries", handler.getEntries).Methods(http.MethodGet)
 	sr.HandleFunc("/entries", handler.setEntryStatus).Methods(http.MethodPut)
 	sr.HandleFunc("/entries/{entryID}", handler.getEntry).Methods(http.MethodGet)
@@ -71,12 +82,18 @@ func Serve(router *mux.Router, store *storage.Storage, pool *worker.Pool) {
 	sr.HandleFunc("/entries/{entryID}/star", handler.toggleStarred).Methods(http.MethodPut)
 	sr.HandleFunc("/entries/{entryID}/save", handler.saveEntry).Methods(http.MethodPost)
 	sr.HandleFunc("/entries/{entryID}/fetch-content", handler.fetchContent).Methods(http.MethodGet)
-	sr.HandleFunc("/flush-history", handler.flushHistory).Methods(http.MethodPut, http.MethodDelete)
-	sr.HandleFunc("/icons/{iconID}", handler.getIconByIconID).Methods(http.MethodGet)
+
+	// Enclosure handlers.
 	sr.HandleFunc("/enclosures/{enclosureID}", handler.getEnclosureByID).Methods(http.MethodGet)
 	sr.HandleFunc("/enclosures/{enclosureID}", handler.updateEnclosureByID).Methods(http.MethodPut)
+
+	// Misc handlers.
 	sr.HandleFunc("/integrations/status", handler.getIntegrationsStatus).Methods(http.MethodGet)
 	sr.HandleFunc("/version", handler.versionHandler).Methods(http.MethodGet)
+	sr.HandleFunc("/flush-history", handler.flushHistory).Methods(http.MethodPut, http.MethodDelete)
+	sr.HandleFunc("/icons/{iconID}", handler.getIconByIconID).Methods(http.MethodGet)
+
+	// API key handlers.
 	sr.HandleFunc("/api-keys", handler.createAPIKey).Methods(http.MethodPost)
 	sr.HandleFunc("/api-keys", handler.getAPIKeys).Methods(http.MethodGet)
 	sr.HandleFunc("/api-keys/{apiKeyID}", handler.deleteAPIKey).Methods(http.MethodDelete)

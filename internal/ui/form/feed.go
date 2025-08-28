@@ -47,8 +47,8 @@ type FeedForm struct {
 	ProxyURL                    string
 }
 
-// Merge updates the fields of the given feed.
-func (f FeedForm) Merge(feed *model.Feed) *model.Feed {
+// Patch updates the fields of the given feed.
+func (f FeedForm) Patch(feed *model.Feed) {
 	feed.Category.ID = f.CategoryID
 	feed.Title = f.Title
 	feed.SiteURL = f.SiteURL
@@ -83,7 +83,7 @@ func (f FeedForm) Merge(feed *model.Feed) *model.Feed {
 	feed.PushoverEnabled = f.PushoverEnabled
 	feed.PushoverPriority = f.PushoverPriority
 	feed.ProxyURL = f.ProxyURL
-	return feed
+
 }
 
 // NewFeedForm parses the HTTP request and returns a FeedForm

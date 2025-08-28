@@ -4,6 +4,8 @@
 package ui // import "miniflux.app/v2/internal/ui"
 
 import (
+	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"miniflux.app/v2/internal/http/request"
@@ -15,10 +17,18 @@ import (
 	"miniflux.app/v2/internal/ui/session"
 	"miniflux.app/v2/internal/ui/view"
 	"miniflux.app/v2/internal/validator"
+	"miniflux.app/v2/internal/version"
 )
 
-func (h *handler) updateSettings(w http.ResponseWriter, r *http.Request) {
+func (h *handler) importSettings(w http.ResponseWriter, r *http.Request) {
 	user, err := h.store.UserByID(request.UserID(r))
+	if err != nil {
+		html.ServerError(w, r, err)
+		return
+	}
+
+	defer r.Body.Close()
+	inputFile, _, err := r.FormFile("import_file")
 	if err != nil {
 		html.ServerError(w, r, err)
 		return
@@ -36,7 +46,33 @@ func (h *handler) updateSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	settingsForm := form.NewSettingsForm(r)
+	settingsForm := form.SettingsForm{
+		Username:                  user.Username,
+		Theme:                     user.Theme,
+		Language:                  user.Language,
+		Timezone:                  user.Timezone,
+		EntryDirection:            user.EntryDirection,
+		EntryOrder:                user.EntryOrder,
+		EntriesPerPage:            user.EntriesPerPage,
+		KeyboardShortcuts:         user.KeyboardShortcuts,
+		ShowReadingTime:           user.ShowReadingTime,
+		CustomCSS:                 user.Stylesheet,
+		CustomJS:                  user.CustomJS,
+		ExternalFontHosts:         user.ExternalFontHosts,
+		EntrySwipe:                user.EntrySwipe,
+		GestureNav:                user.GestureNav,
+		DisplayMode:               user.DisplayMode,
+		DefaultReadingSpeed:       user.DefaultReadingSpeed,
+		CJKReadingSpeed:           user.CJKReadingSpeed,
+		DefaultHomePage:           user.DefaultHomePage,
+		CategoriesSortingOrder:    user.CategoriesSortingOrder,
+		MarkReadBehavior:          form.MarkAsReadBehavior(user.MarkReadOnView, user.MarkReadOnMediaPlayerCompletion),
+		MediaPlaybackRate:         user.MediaPlaybackRate,
+		BlockFilterEntryRules:     user.BlockFilterEntryRules,
+		KeepFilterEntryRules:      user.KeepFilterEntryRules,
+		AlwaysOpenExternalLinks:   user.AlwaysOpenExternalLinks,
+		OpenExternalLinksInNewTab: user.OpenExternalLinksInNewTab,
+	}
 
 	sess := session.New(h.store, request.SessionID(r))
 	view := view.New(h.tpl, r, sess)
@@ -59,32 +95,19 @@ func (h *handler) updateSettings(w http.ResponseWriter, r *http.Request) {
 	view.Set("countWebAuthnCerts", h.store.CountWebAuthnCredentialsByUserID(user.ID))
 	view.Set("webAuthnCerts", creds)
 
-	if validationErr := settingsForm.Validate(); validationErr != nil {
-		view.Set("errorMessage", validationErr.Translate(user.Language))
+	userExport := &model.UserExport{}
+	if err := json.NewDecoder(inputFile).Decode(userExport); err != nil {
+		view.Set("errorMessage", err.Error()) // TODO: translate error message
 		html.OK(w, r, view.Render("settings"))
 		return
 	}
-
-	userModificationRequest := &model.UserModificationRequest{
-		Username:               model.OptionalString(settingsForm.Username),
-		Password:               model.OptionalString(settingsForm.Password),
-		Theme:                  model.OptionalString(settingsForm.Theme),
-		Language:               model.OptionalString(settingsForm.Language),
-		Timezone:               model.OptionalString(settingsForm.Timezone),
-		EntryDirection:         model.OptionalString(settingsForm.EntryDirection),
-		EntryOrder:             model.OptionalString(settingsForm.EntryOrder),
-		EntriesPerPage:         model.OptionalNumber(settingsForm.EntriesPerPage),
-		CategoriesSortingOrder: model.OptionalString(settingsForm.CategoriesSortingOrder),
-		DisplayMode:            model.OptionalString(settingsForm.DisplayMode),
-		GestureNav:             model.OptionalString(settingsForm.GestureNav),
-		DefaultReadingSpeed:    model.OptionalNumber(settingsForm.DefaultReadingSpeed),
-		CJKReadingSpeed:        model.OptionalNumber(settingsForm.CJKReadingSpeed),
-		DefaultHomePage:        model.OptionalString(settingsForm.DefaultHomePage),
-		MediaPlaybackRate:      model.OptionalNumber(settingsForm.MediaPlaybackRate),
-		BlockFilterEntryRules:  model.OptionalString(settingsForm.BlockFilterEntryRules),
-		KeepFilterEntryRules:   model.OptionalString(settingsForm.KeepFilterEntryRules),
-		ExternalFontHosts:      model.OptionalString(settingsForm.ExternalFontHosts),
+	
+	// The version field exists to allow for future changes to the user export format
+	// but currently is not used.
+	if userExport.Version != version.Version {
+		slog.Warn("user settings import version mismatch", "imported version", userExport.Version)
 	}
+	userModificationRequest := &userExport.UserModificationRequest
 
 	if validationErr := validator.ValidateUserModification(h.store, user.ID, userModificationRequest); validationErr != nil {
 		view.Set("errorMessage", validationErr.Translate(user.Language))
@@ -92,10 +115,15 @@ func (h *handler) updateSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	settingsForm.Patch(user)
+	// White-out certain fields that we never want updated through the importer
+	userModificationRequest.Password = nil
+	userModificationRequest.Username = nil
+
+	userModificationRequest.Patch(user)
 	err = h.store.UpdateUser(user)
 	if err != nil {
-		html.ServerError(w, r, err)
+		view.Set("errorMessage", err.Error()) // TODO: translate error message
+		html.OK(w, r, view.Render("settings"))
 		return
 	}
 

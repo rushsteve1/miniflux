@@ -130,8 +130,8 @@ type IntegrationForm struct {
 	PushoverPrefix                   string
 }
 
-// Merge copy form values to the model.
-func (i IntegrationForm) Merge(integration *model.Integration) {
+// Patch copy form values to the model.
+func (i IntegrationForm) Patch(integration *model.Integration) {
 	integration.PinboardEnabled = i.PinboardEnabled
 	integration.PinboardToken = i.PinboardToken
 	integration.PinboardTags = i.PinboardTags

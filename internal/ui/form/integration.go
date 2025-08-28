@@ -5,7 +5,6 @@ package form // import "miniflux.app/v2/internal/ui/form"
 
 import (
 	"net/http"
-	"strconv"
 
 	"miniflux.app/v2/internal/model"
 )
@@ -131,8 +130,8 @@ type IntegrationForm struct {
 	PushoverPrefix                   string
 }
 
-// Merge copy form values to the model.
-func (i IntegrationForm) Merge(integration *model.Integration) {
+// Patch copy form values to the model.
+func (i IntegrationForm) Patch(integration *model.Integration) {
 	integration.PinboardEnabled = i.PinboardEnabled
 	integration.PinboardToken = i.PinboardToken
 	integration.PinboardTags = i.PinboardTags
@@ -288,7 +287,7 @@ func NewIntegrationForm(r *http.Request) *IntegrationForm {
 		TelegramBotEnabled:               r.FormValue("telegram_bot_enabled") == "1",
 		TelegramBotToken:                 r.FormValue("telegram_bot_token"),
 		TelegramBotChatID:                r.FormValue("telegram_bot_chat_id"),
-		TelegramBotTopicID:               optionalInt64Field(r.FormValue("telegram_bot_topic_id")),
+		TelegramBotTopicID:               model.OptionalInt64(r.FormValue("telegram_bot_topic_id")),
 		TelegramBotDisableWebPagePreview: r.FormValue("telegram_bot_disable_web_page_preview") == "1",
 		TelegramBotDisableNotification:   r.FormValue("telegram_bot_disable_notification") == "1",
 		TelegramBotDisableButtons:        r.FormValue("telegram_bot_disable_buttons") == "1",
@@ -369,12 +368,4 @@ func NewIntegrationForm(r *http.Request) *IntegrationForm {
 		PushoverDevice:                   r.FormValue("pushover_device"),
 		PushoverPrefix:                   r.FormValue("pushover_prefix"),
 	}
-}
-
-func optionalInt64Field(formValue string) *int64 {
-	if formValue == "" {
-		return nil
-	}
-	value, _ := strconv.ParseInt(formValue, 10, 64)
-	return &value
 }

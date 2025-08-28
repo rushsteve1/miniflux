@@ -78,14 +78,15 @@ type EntriesStatusUpdateRequest struct {
 
 // EntryUpdateRequest represents a request to update an entry.
 type EntryUpdateRequest struct {
-	URL           *string  `json:"url"`
-	Title         *string  `json:"title"`
-	Author        *string  `json:"author"`
-	Date          *time.Time  `json:"date"`
-	Content       *string  `json:"content"`
-	ReadingTime   *int     `json:"reading_time"`
-	Tags          []string `json:"tags"`
-	ScrollPercent *float32 `json:"scroll_percent"`
+	URL           *string    `json:"url"`
+	Title         *string    `json:"title"`
+	Author        *string    `json:"author"`
+	Content       *string    `json:"content"`
+	ContentHTML   *string    `json:"content_html"`
+	Date          *time.Time `json:"date"`
+	ReadingTime   *int       `json:"reading_time"`
+	Tags          []string   `json:"tags"`
+	ScrollPercent *float32   `json:"scroll_percent"`
 }
 
 func (e *EntryUpdateRequest) Patch(entry *Entry) {
@@ -111,6 +112,10 @@ func (e *EntryUpdateRequest) Patch(entry *Entry) {
 
 	if e.ReadingTime != nil && *e.ReadingTime != 0 {
 		entry.ReadingTime = *e.ReadingTime
+	}
+
+	if e.Date != nil && !e.Date.IsZero() {
+		entry.Date = *e.Date
 	}
 
 	if e.Tags != nil {

@@ -142,7 +142,7 @@ func (e *EntryQueryBuilder) WithCategoryID(categoryID int64) *EntryQueryBuilder 
 }
 
 // WithStatus filter by entry status.
-func (e *EntryQueryBuilder) WithStatus(status string) *EntryQueryBuilder {
+func (e *EntryQueryBuilder) WithStatus(status model.EntryStatus) *EntryQueryBuilder {
 	if status != "" {
 		e.conditions = append(e.conditions, "e.status = $"+strconv.Itoa(len(e.args)+1))
 		e.args = append(e.args, status)
@@ -151,10 +151,10 @@ func (e *EntryQueryBuilder) WithStatus(status string) *EntryQueryBuilder {
 }
 
 // WithStatuses filter by a list of entry statuses.
-func (e *EntryQueryBuilder) WithStatuses(statuses []string) *EntryQueryBuilder {
+func (e *EntryQueryBuilder) WithStatuses(statuses []model.EntryStatus) *EntryQueryBuilder {
 	if len(statuses) > 0 {
 		e.conditions = append(e.conditions, fmt.Sprintf("e.status = ANY($%d)", len(e.args)+1))
-		e.args = append(e.args, pq.StringArray(statuses))
+		e.args = append(e.args, pq.StringArray(model.StatusesToString(statuses)))
 	}
 	return e
 }
@@ -171,7 +171,7 @@ func (e *EntryQueryBuilder) WithTags(tags []string) *EntryQueryBuilder {
 }
 
 // WithoutStatus set the entry status that should not be returned.
-func (e *EntryQueryBuilder) WithoutStatus(status string) *EntryQueryBuilder {
+func (e *EntryQueryBuilder) WithoutStatus(status model.EntryStatus) *EntryQueryBuilder {
 	if status != "" {
 		e.conditions = append(e.conditions, "e.status <> $"+strconv.Itoa(len(e.args)+1))
 		e.args = append(e.args, status)

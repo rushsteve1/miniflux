@@ -9,11 +9,17 @@ import (
 	"time"
 )
 
-// Entry statuses and default sorting order.
+// Entry statuses.
+type EntryStatus string
+
 const (
-	EntryStatusUnread       = "unread"
-	EntryStatusRead         = "read"
-	EntryStatusRemoved      = "removed"
+	EntryStatusUnread  EntryStatus = "unread"
+	EntryStatusRead    EntryStatus = "read"
+	EntryStatusRemoved EntryStatus = "removed"
+)
+
+// Sorting orders.
+const (
 	DefaultSortingOrder     = "published_at"
 	DefaultSortingDirection = "asc"
 )
@@ -23,7 +29,7 @@ type Entry struct {
 	ID          int64         `json:"id"`
 	UserID      int64         `json:"user_id"`
 	FeedID      int64         `json:"feed_id"`
-	Status      string        `json:"status"`
+	Status      EntryStatus   `json:"status"`
 	Hash        string        `json:"hash"`
 	Title       string        `json:"title"`
 	URL         string        `json:"url"`
@@ -72,8 +78,8 @@ type Entries []*Entry
 
 // EntriesStatusUpdateRequest represents a request to change entries status.
 type EntriesStatusUpdateRequest struct {
-	EntryIDs []int64 `json:"entry_ids"`
-	Status   string  `json:"status"`
+	EntryIDs []int64     `json:"entry_ids"`
+	Status   EntryStatus `json:"status"`
 }
 
 // EntryUpdateRequest represents a request to update an entry.
@@ -137,4 +143,22 @@ func CleanTags(tags []string) []string {
 	}
 	slices.Sort(cleanedTags)
 	return slices.Compact(cleanedTags)
+}
+
+func ToStatuses(statuses []string) []EntryStatus {
+	// Could use unsafe to make this more optimized
+	// but I don't think it's worth it
+	var result []EntryStatus
+	for _, status := range statuses {
+		result = append(result, EntryStatus(status))
+	}
+	return result
+}
+
+func StatusesToString(statuses []EntryStatus) []string {
+	var result []string
+	for _, status := range statuses {
+		result = append(result, string(status))
+	}
+	return result
 }
